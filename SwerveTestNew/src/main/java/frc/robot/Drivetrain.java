@@ -41,6 +41,33 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveModule m_backLeft = new SwerveModule(2, 6, 10);
   private final SwerveModule m_backRight = new SwerveModule(1, 5, 11);
 
+  SwerveModulePosition[] m_positions = {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
+
+  private void resetPositions() {
+    m_frontLeft.reset();
+    m_frontRight.reset();
+    m_backLeft.reset();
+    m_backRight.reset();
+    updatePositions();
+
+    //m_positions[0]=new SwerveModulePosition();
+		//m_positions[1]=new SwerveModulePosition();
+		//m_positions[2]=new SwerveModulePosition();
+		//m_positions[3]=new SwerveModulePosition();
+  }
+  
+  public void reset() {
+    resetOdometry();
+    log();
+  }
+  
+  private void updatePositions() {
+    m_positions[0]=m_frontLeft.getPosition();
+		m_positions[1]=m_frontRight.getPosition();
+		m_positions[2]=m_backLeft.getPosition();
+		m_positions[3]=m_backRight.getPosition();
+  }
+
   static int count = 0;
   private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
 
@@ -103,18 +130,20 @@ public class Drivetrain extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("pigeon", m_gyro.getAngle());
+    m_frontLeft.log();
+    m_frontRight.log();
+    m_backLeft.log();
+    m_backRight.log();
+
+
   }
 
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
+    updatePositions();
     m_poseEstimator.update(
-        getGyroAngle(),
-        new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
-          m_frontRight.getPosition(),
-          m_backLeft.getPosition(),
-          m_backRight.getPosition()
-        });
+        getGyroAngle(), m_positions
+       );
 
     // Also apply vision measurements. We use 0.3 seconds in the past as an example -- on
     // a real robot, this must be calculated based either on latency or timestamps.
@@ -126,17 +155,11 @@ public class Drivetrain extends SubsystemBase {
 
   public void resetOdometry(){
     m_gyro.reset();
+    resetPositions();
     m_poseEstimator.resetPosition(getGyroAngle(), 
-    new SwerveModulePosition[] {
-      m_frontLeft.getPosition(),
-      m_frontRight.getPosition(),
-      m_backLeft.getPosition(),
-      m_backRight.getPosition()
-    },
+    m_positions,
     new Pose2d(0, 0, new Rotation2d()));
   }
-
- 
 
   public void driveForwardAll(double dist) {
     m_backLeft.driveForward(dist);
