@@ -14,44 +14,60 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
 
 public class SwerveModule {
+
+  static public double driveGearRatio=8.14;  // MK4i drive (standard)
+  static public double turnGearRatio=21.429; // MK4i turn (all)
+
   private static final double kWheelRadius = 2;
   private static final int kEncoderResolution = 4096;
-  private static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2);
+  private static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/driveGearRatio;
+ 
 
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
-  private static final double kModuleMaxAngularAcceleration = 2 * Math.PI; // radians per second squared
+  private static final double kModuleMaxAngularAcceleration = Drivetrain.kModuleMaxAngularAcceleration; // radians per second squared
 
   private final CANSparkMax m_driveMotor;
   private final CANSparkMax m_turningMotor;
 
   private final RelativeEncoder m_driveEncoder;
   private final CANCoder m_turningEncoder;
+  String name;
+
 
   int  cnt=0;
 
   // Gains are for example purposes only - must be determined for your own robot!
-  private final PIDController m_drivePIDController = new PIDController(0.2, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
   //before bodging:  = new PIDController(.1, 0, 0);
 
   // Gains are for example purposes only - must be determined for your own robot!
   private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-      .01,
+      2,
       0,
       0,
       new TrapezoidProfile.Constraints(
           kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration));
 
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
+  //private final PIDController m_turningPIDController = new PIDController(1, 0, 0);
 
-  private int channel;
+  // Gains are for example purposes only - must be determined for your own robot!
+  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
+  
+  
+
+  private int m_motorChannel;
+  private int m_turnChannel;
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder
    * and turning encoder.
@@ -65,41 +81,57 @@ public class SwerveModule {
       int driveMotorChannel,
       int turningMotorChannel,
       int turningEncoder) {
-      channel = driveMotorChannel;
-      SmartDashboard.putString("mod"+channel, "");
-    m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
-    m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+      m_motorChannel = driveMotorChannel;
+      m_turnChannel = turningMotorChannel;
+      SmartDashboard.putString("mod"+m_motorChannel, "");
+      m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+      m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    m_driveEncoder = m_driveMotor.getEncoder();
-    m_driveEncoder.setPositionConversionFactor(kDistPerRot);
-    m_turningEncoder = new CANCoder(turningEncoder);
+      name=Drivetrain.chnlnames[m_motorChannel-1];
 
-  
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    // m_driveEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius /
-    // kEncoderResolution);
+   
+    m_driveEncoder = m_driveMotor.getEncoder();
+    m_driveEncoder.setPositionConversionFactor(kDistPerRot); // inches to meters
+    m_driveEncoder.setVelocityConversionFactor(kDistPerRot/60);  // convert RPM to meters per second
+    //m_driveMotor.setInverted(true);
+    // Set the distance (in this case, angle) in radians per pulse for the turning encoder.
+    // CANencoder API seems to want offsets range etc to be set in degrees
+   
+    m_turningEncoder = new CANCoder(turningEncoder);
 
-    // Set the distance (in this case, angle) in radians per pulse for the turning
-    // encoder.
-    // This is the the angle through an entire rotation (2 * pi) divided by the
-    // encoder resolution.
-    // m_turningEncoder.setDistancePerPulse(2 * Math.PI / kEncoderResolution); -->
-    // some code that used to exist
+    CANCoderConfiguration config = new CANCoderConfiguration();
+    // set units of the CANCoder to radians, with velocity being radians per second
+    config.sensorCoefficient = 2 * Math.PI/kEncoderResolution; // 4096 for CANencoder
+    config.unitString = "rad";
+    config.sensorTimeBase = SensorTimeBase.PerSecond; // set timebase to seconds
+    config.absoluteSensorRange=AbsoluteSensorRange.Signed_PlusMinus180; // should avoid discontinuity at 0 degrees or 360
+    //config.absoluteSensorRange=AbsoluteSensorRange.Unsigned_0_to_360;
+    config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+    m_turningEncoder.configAllSettings(config);
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    //m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    
   }
 
   public void reset(){
+    SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
     m_driveEncoder.setPosition(0);
-    m_turningEncoder.setPosition(0);
+    //m_turningEncoder.setPosition(0);
     cnt=0;
   }
-  public Rotation2d getAngle() {
-    return Rotation2d.fromDegrees(m_turningEncoder.getPosition());
+  public double heading(){
+    return m_turningEncoder.getAbsolutePosition();
+  }
+  public double cummulativeAngle(){
+    return m_turningEncoder.getPosition();
+  }
+  public Rotation2d getRotation2d() {
+    return Rotation2d.fromRadians(cummulativeAngle());
   }
 
   /**
@@ -109,7 +141,7 @@ public class SwerveModule {
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(
-        m_driveEncoder.getVelocity(), getAngle());
+        m_driveEncoder.getVelocity(), getRotation2d());
   }
 
   /**
@@ -119,7 +151,7 @@ public class SwerveModule {
    */
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        m_driveEncoder.getPosition(), getAngle());
+        m_driveEncoder.getPosition(), getRotation2d());
   }
 
   public double getDistance(){
@@ -136,56 +168,76 @@ public class SwerveModule {
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, getAngle());
+    //SwerveModuleState state = desiredState;
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
 
     // Calculate the drive output from the drive PID controller.
-    final double driveOutput = m_drivePIDController.calculate(getVelocity(), state.speedMetersPerSecond);
+    double driveOutput = m_drivePIDController.calculate(getVelocity(), state.speedMetersPerSecond);
 
-    final double driveFeedforward = 0;//m_driveFeedforward.calculate(state.speedMetersPerSecond);
+    double driveFeedforward = 0;//m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     // Calculate the turning motor output from the turning PID controller.
-    final double turnOutput = m_turningPIDController.calculate(getAngle().getRadians(), state.angle.getRadians());
+    double turnOutput = m_turningPIDController.calculate(getRotation2d().getRadians(), state.angle.getRadians());
+    double turnFeedforward = 0; //m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
-    final double turnFeedforward = 0; //m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
+   
+    //if (channel == 3) {
 
+     // double output = driveOutput + driveFeedforward;
+    //System.out.println(cnt + " mod " + channel + " " + output + " " + getVelocity() + " " + state.speedMetersPerSecond);
+    //SmartDashboard.putString("mod"+channel, s);
     m_driveMotor.setVoltage(driveOutput + driveFeedforward);
-    m_turningMotor.setVoltage(turnOutput + turnFeedforward);
-
-    String s = String.format("POS:%-1.2f AngleDeg:%-4.1f DriveOut:%-1.2f TurnOut:%-1.2f\n", 
-    getDistance(), getAngle().getDegrees(), driveOutput, turnOutput); //Take the values from above and put them into the log function
-    cnt++;
-    if (channel == 1) {
-      
-        System.out.println(cnt + " mod " + channel + " " + s);
-        if (cnt == 12)
-          cnt = 0;
-      
-    }
-    SmartDashboard.putString("mod"+channel, s);
+    m_turningMotor.setVoltage(-turnOutput + turnFeedforward);
+    // String s = String.format("POS:%-1.2f AngleDeg:%-4.1f DriveOut:%-1.2f TurnOut:%-1.2f\n", 
+     //getDistance(), getRotation2d().getDegrees(), driveOutput, turnOutput);
+    //}
+     double actual=getRotation2d().getDegrees();
+     double target=state.angle.getDegrees();
+     double output=turnOutput;
+  
+      String s = String.format("actual:%-1.2f  desired:%-4.1f volt:%-4.1f \n",
+      actual, target,output);
+      SmartDashboard.putString(name, s);
+      if((cnt%10)==0){
+          System.out.println(name+" "+s);
+      }
+      cnt++;
+   
   }
 
   public void log() {
-    String s = String.format("POS:%-1.2f AngleDeg:%-4.1f\n", 
-    getDistance(), getAngle().getDegrees()); //Take the values from above and put them into the log function
-    // String s = String.format("POS:%-1.2f AngleDeg:%-4.1f DriveOut:%-1.2f TurnOut:%-1.2f\n", 
-    // getDistance(), getAngle().getDegrees(), driveOutput, turnOutput); //Take the values from above and put them into the log function
-    // //System.out.println("s");
-    SmartDashboard.putString("mod"+channel, s);
-      
+    // String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
+    // getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
+    // SmartDashboard.putString(name, s);
+    //if(name.equals("FL"))
+   // System.out.println(s);
   }
 
   public void setOffset(double offset) {
     m_turningEncoder.configMagnetOffset(offset,20);
   }
 
+  public void setInverted(){
+    m_driveMotor.setInverted(true);
+  }
+
   public void driveForward(double dist) {
     m_driveMotor.set(dist);
+    log();
   }
   public void turnAround(double dist) {
+    //System.out.println(m_turnChannel + " " + Math.toDegrees(m_turningEncoder.getAbsolutePosition()));
+
     m_turningMotor.set(dist);
+
+    String s = String.format("Angle:%-4.1f Abs:%-4.1f turn power:%-3.2f | %-1.1f\n", 
+    Math.toDegrees(m_turningEncoder.getPosition()), Math.toDegrees(m_turningEncoder.getAbsolutePosition()),dist, Math.random());
+    SmartDashboard.putString(name, s);
+    // if((cnt%100)==0 &&name.equals("FL"))
+    // System.out.println(s);
+    cnt++;
     // System.out.println(m_turningEncoder.getDeviceID());
     // System.out.println(m_turningEncoder.getAbsolutePosition());
-    SmartDashboard.putString("mod" + channel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
   }
 
 }
