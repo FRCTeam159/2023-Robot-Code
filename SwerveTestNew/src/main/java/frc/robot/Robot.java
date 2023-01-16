@@ -57,7 +57,7 @@ public class Robot extends TimedRobot {
     // the right by default.
     final var rot = -m_rotLimiter.calculate(MathUtil.applyDeadband(m_controller.getRightX(), 0.2))* Drivetrain.kMaxAngularSpeed;
 
-    m_swerve.drive(xSpeed + 0.001, ySpeed, 4 * rot, fieldRelative);
+    m_swerve.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
     // m_swerve.driveForwardAll(xSpeed);
     // m_swerve.turnAroundAll(rot);
   }

@@ -21,24 +21,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain extends SubsystemBase {
-  //public static final double kMaxSpeed = 20.0; // 1 meters per second
-  public static final double kMaxSpeed = 4; // 1 meters per second
-  public static final double kMaxAngularSpeed = 2 * Math.PI; // 1/4 rotation per second
-  public static final double kModuleMaxAngularAcceleration = Math.PI / 2;
+  public static final double kMaxSpeed = 4; // 4 meters per second
+  public static final double kMaxAngularSpeed = 4 * Math.PI; // 2 rotation per second
+  public static final double kModuleMaxAngularAcceleration = Math.PI / 2; // 0.5 rotations/s/s
 
-// 5 179.12073170521214
-// 7 176.65979917933092
-// 8 -176.39612783727222
-// 6 179.38440304727084
   // turn encoder offsets 
-  // public static final double kFrontLeftOffset = -13.97;
-  // public static final double kFrontRightOffset = -286.35;
-  // public static final double kBackLeftOffset = -222.54;
-  // public static final double kBackRightOffset = -293.2;
-
-  // FIXME: flip wheels 180 to make offsets ~0
-  // Q: why did these numbers change from last time ?
-  // TODO: use CTRE tuner to set these offsets in NV firmware 
+  
   public static final double kFrontLeftOffset = -6.7;
   public static final double kFrontRightOffset = 74.5;
   public static final double kBackLeftOffset = 137.1;
@@ -58,7 +46,7 @@ public class Drivetrain extends SubsystemBase {
 	private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
 	private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
 	private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
-	private final Translation2d m_backRightLocation = new Translation2d(-delx, dely);
+	private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
 
   public static String chnlnames[]={"BR","BL","FL","FR"};
 
@@ -71,18 +59,17 @@ public class Drivetrain extends SubsystemBase {
       new SwerveModulePosition(), new SwerveModulePosition(),
       new SwerveModulePosition(), new SwerveModulePosition() };
 
-
-      public Drivetrain() {
-        m_gyro.reset();
-    
-      m_frontLeft.setOffset(kFrontLeftOffset);
-        m_frontRight.setOffset(kFrontRightOffset);
-        m_backLeft.setOffset(kBackLeftOffset);
-        m_backRight.setOffset(kBackRightOffset);
-        m_frontLeft.setInverted();
-        m_backLeft.setInverted();
-        resetOdometry();
-      }
+  public Drivetrain() {
+    m_gyro.reset();
+  
+    m_frontLeft.setOffset(kFrontLeftOffset);
+    m_frontRight.setOffset(kFrontRightOffset);
+    m_backLeft.setOffset(kBackLeftOffset);
+    m_backRight.setOffset(kBackRightOffset);
+    m_frontLeft.setInverted();
+    m_backLeft.setInverted();
+    resetOdometry();
+  }
 
   private void resetPositions() {
     m_frontLeft.reset();
@@ -122,8 +109,7 @@ public class Drivetrain extends SubsystemBase {
           VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // drive confidence stds
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // turn confidence stds
 
-
- public Rotation2d getGyroAngle() {
+  public Rotation2d getGyroAngle() {
     return m_gyro.getRotation2d();
   }
   
@@ -156,23 +142,19 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.log();
     m_backLeft.log();
     m_backRight.log();
-
-
   }
 
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     updatePositions();
-    m_poseEstimator.update(
-        getGyroAngle(), m_positions
-       );
+    m_poseEstimator.update(getGyroAngle(), m_positions);
 
     // Also apply vision measurements. We use 0.3 seconds in the past as an example -- on
     // a real robot, this must be calculated based either on latency or timestamps.
-    m_poseEstimator.addVisionMeasurement(
-        ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
-            m_poseEstimator.getEstimatedPosition()),
-        Timer.getFPGATimestamp() - 0.3);
+    //m_poseEstimator.addVisionMeasurement(
+    //    ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
+   //         m_poseEstimator.getEstimatedPosition()),
+    //    Timer.getFPGATimestamp() - 0.3);
   }
 
   public void resetOdometry(){
