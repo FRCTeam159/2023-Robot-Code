@@ -25,12 +25,12 @@ import com.revrobotics.RelativeEncoder;
 
 public class SwerveModule {
 
-  static public double driveGearRatio=8.14;  // MK4i drive (standard)
-  static public double turnGearRatio=21.429; // MK4i turn (all)
+  static public final double kDriveGearRatio=8.14;  // MK4i drive (standard)
+  static public final double kTurnGearRatio=21.429; // MK4i turn (all)
 
   private static final double kWheelRadius = 2;
   private static final int kEncoderResolution = 4096;
-  private static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/driveGearRatio;
+  private static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
  
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration = Drivetrain.kModuleMaxAngularAcceleration; // radians per second squared

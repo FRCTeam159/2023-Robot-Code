@@ -37,8 +37,8 @@ public class Drivetrain extends SubsystemBase {
   public static final double kBackLeftOffset = 138.2;
   public static final double kBackRightOffset = 64.3;
 
-  public static double front_wheel_base = 23.22; // distance beteen front wheels
-	public static double side_wheel_base = 23.22;  // distance beteen side wheels
+  public static final double front_wheel_base = 23.22; // distance beteen front wheels
+	public static final double side_wheel_base = 23.22;  // distance beteen side wheels
 
 	public static double dely = Units.inchesToMeters(0.5 * side_wheel_base); // 0.2949 metters
 	public static double delx = Units.inchesToMeters(0.5 * front_wheel_base);
