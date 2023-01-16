@@ -168,13 +168,13 @@ public class SwerveModule {
     double velocity=getVelocity();
     // Calculate the drive output from the drive PID controller.
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
-    double driveFeedforward = 0;//m_driveFeedforward.calculate(state.speedMetersPerSecond);
+    double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     double turn_angle=getRotation2d().getRadians();
 
     // Calculate the turning motor output from the turning PID controller.
     double turnOutput = -m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
-    double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
+    double turnFeedforward = -m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     double set_drive=driveOutput+driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;;
@@ -194,9 +194,9 @@ public class SwerveModule {
   }
 
   public void log() {
-    // String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
-    // getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
-    // SmartDashboard.putString(name, s);
+    String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
+    getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
+    SmartDashboard.putString(name, s);
     //if(name.equals("FL"))
    // System.out.println(s);
   }

@@ -23,19 +23,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Drivetrain extends SubsystemBase {
   public static final double kMaxSpeed = 4; // 4 meters per second
   public static final double kMaxAngularSpeed = 4 * Math.PI; // 2 rotation per second
-  public static final double kModuleMaxAngularAcceleration = Math.PI / 2; // 0.5 rotations/s/s
+  public static final double kModuleMaxAngularAcceleration = 2*Math.PI; // 1 rotations/s/s
 
   // turn encoder offsets 
   
-  public static final double kFrontLeftOffset = -6.7;
-  public static final double kFrontRightOffset = 74.5;
-  public static final double kBackLeftOffset = 137.1;
-  public static final double kBackRightOffset = 63.1;
+  // public static final double kFrontLeftOffset = -6.7;
+  // public static final double kFrontRightOffset = 74.5;
+  // public static final double kBackLeftOffset = 137.1;
+  // public static final double kBackRightOffset = 63.1;
 
-  // public static final double kFrontLeftOffset = 0.0f;
-  // public static final double kFrontRightOffset = 0.0f;
-  // public static final double kBackLeftOffset = 0.0f;
-  // public static final double kBackRightOffset = 0.0f;
+  public static final double kFrontLeftOffset = -7.3;
+  public static final double kFrontRightOffset = 74.5;
+  public static final double kBackLeftOffset = 138.2;
+  public static final double kBackRightOffset = 64.3;
 
   public static double front_wheel_base = 23.22; // distance beteen front wheels
 	public static double side_wheel_base = 23.22;  // distance beteen side wheels
@@ -138,10 +138,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("pigeon", m_gyro.getAngle());
-    m_frontLeft.log();
-    m_frontRight.log();
-    m_backLeft.log();
-    m_backRight.log();
+    // m_frontLeft.log();
+    // m_frontRight.log();
+    // m_backLeft.log();
+    // m_backRight.log();
   }
 
   /** Updates the field relative position of the robot. */
