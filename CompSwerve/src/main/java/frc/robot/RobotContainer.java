@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveWithGamepad;
+import frc.robot.subsystems.AprilTagDetector;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.SwerveModule;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,13 +28,17 @@ public class RobotContainer {
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
 
+  private final AprilTagDetector m_apriltag = new AprilTagDetector();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_Drivetrain.setDefaultCommand(new DriveWithGamepad(m_Drivetrain, m_Controller));
     // Configure the button bindings
     configureBindings();
   }
-
+  public void robotInit() {
+    m_apriltag.start();
+  }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
