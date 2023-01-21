@@ -44,7 +44,7 @@ public class DriveWithGamepad extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveWithJoystick(true);
+    driveWithJoystick(false);
   }
 
   // Called once the command ends or is interrupted.
@@ -71,7 +71,7 @@ public class DriveWithGamepad extends CommandBase {
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
-    final var rot = -m_rotLimiter.calculate(MathUtil.applyDeadband(m_controller.getRightX(), 0.2))* kMaxAngularSpeed;
+    final var rot = -m_rotLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getRightX(), 0.2), 3))* kMaxAngularSpeed;
 
     m_drive.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
     // m_swerve.driveForwardAll(xSpeed);

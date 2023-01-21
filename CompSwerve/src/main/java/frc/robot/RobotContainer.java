@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveWithGamepad;
-import frc.robot.subsystems.AprilTagDetector;
+import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.SwerveModule;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,7 +28,7 @@ public class RobotContainer {
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
 
-  private final AprilTagDetector m_apriltag = new AprilTagDetector();
+  private final DetectorAprilTag m_apriltag = new DetectorAprilTag();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

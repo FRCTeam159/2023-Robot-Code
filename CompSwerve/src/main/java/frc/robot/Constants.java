@@ -33,4 +33,6 @@ public final class Constants {
 
     public static final double kFrontWheelBase = 23.22; // distance beteen front wheels
 	public static final double kSideWheelBase = 23.22;  // distance beteen side wheels
+
+    public static final double kStartArm = 5;
 }

@@ -41,7 +41,7 @@ public class SwerveModule extends SubsystemBase {
   int cnt = 0;
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(2, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
       10,
