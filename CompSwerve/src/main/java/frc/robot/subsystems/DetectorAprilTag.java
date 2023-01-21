@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -21,6 +22,11 @@ import edu.wpi.first.apriltag.AprilTagDetection;
 
 public class DetectorAprilTag extends Thread {
   /** Creates a new AprilTagDetector. */
+
+  static {
+    System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+  }
+  
   static int imageWidth = 640;
   static int imageHeight = 480;
   private UsbCamera camera;
