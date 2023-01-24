@@ -35,4 +35,7 @@ public final class Constants {
 	public static final double kSideWheelBase = 23.22;  // distance beteen side wheels
 
     public static final double kStartArm = 5;
+
+    public static final int kImageWidth = 640;
+    public static final int kImageHeight = 480;
 }

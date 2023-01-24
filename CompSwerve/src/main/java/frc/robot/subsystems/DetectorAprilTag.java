@@ -8,55 +8,44 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.ImageWindow;
 import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.apriltag.jni.AprilTagJNI;
 import edu.wpi.first.apriltag.AprilTagDetector;
 import edu.wpi.first.apriltag.AprilTagDetection;
+import static frc.robot.Constants.*;
 
 public class DetectorAprilTag extends Thread {
   /** Creates a new AprilTagDetector. */
+  public Camera m_camera;
 
   static {
     System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
   }
   
-  static int imageWidth = 640;
-  static int imageHeight = 480;
-  private UsbCamera camera;
-  private CvSink UsbCameraSink;
+
   static Mat mat;
   static Mat graymat = new Mat();
-  protected static CvSource source = CameraServer.putVideo("Camera Output", imageWidth, imageHeight);
   protected AprilTagDetector wpi_detector;
 
-
   public double h_FOV = 50;
-  public double aspect = ((double)imageWidth ) / imageHeight;
+  public double aspect = ((double)kImageWidth ) / kImageHeight;
   public double v_FOV = 50;
-  public double cx = imageWidth/2;
-  public double cy = imageHeight/2;
+  public double cx = kImageWidth/2;
+  public double cy = kImageHeight/2;
   public double fx = cx / Math.tan(0.05*Math.toRadians(h_FOV));
   public double fy = cy / Math.tan(0.05*Math.toRadians(v_FOV));
 
   public static double targetSize = Units.inchesToMeters(6);
 
 
-  public DetectorAprilTag() {
+  public DetectorAprilTag(Camera camera) {
     wpi_detector = new AprilTagDetector();
     wpi_detector.addFamily("tag16h5", 0);
-    camera = CameraServer.startAutomaticCapture(0);
-    camera.setResolution(imageWidth, imageHeight);
-    camera.setFPS(20);
-
-    UsbCameraSink = CameraServer.getVideo(camera);
-
+    m_camera.camera = CameraServer.startAutomaticCapture(0);
+    camera = m_camera;
   }
 
   // private DetectionResult[] getTags(Mat mat) { 
@@ -67,7 +56,7 @@ public class DetectorAprilTag extends Thread {
 
   private Mat getUsbCameraFrame() {
     Mat mat = new Mat();
-    UsbCameraSink.grabFrame(mat);
+    m_camera.UsbCameraSink.grabFrame(mat);
     return mat;
   }
 
@@ -83,7 +72,7 @@ public class DetectorAprilTag extends Thread {
       Imgproc.cvtColor(mat, graymat, Imgproc.COLOR_RGB2GRAY);
       Thread.sleep(50);
 
-      UsbCameraSink.grabFrame(mat);
+      m_camera.UsbCameraSink.grabFrame(mat);
       AprilTagDetection[] detections = wpi_detector.detect(graymat);
       for (AprilTagDetection detection : detections) {
         // draw lines around the tag
@@ -104,7 +93,7 @@ public class DetectorAprilTag extends Thread {
           crossColor,
           3);
       }
-      putFrame(source, mat);
+      putFrame(Camera.source, mat);
 
     } catch (Exception e) {
       System.out.println("apriltag exception: " + e);
