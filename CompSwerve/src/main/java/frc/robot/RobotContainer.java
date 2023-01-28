@@ -11,7 +11,7 @@ import frc.robot.commands.DriveWithGamepad;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.SwerveModule;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -29,7 +29,7 @@ public class RobotContainer {
 
   //private final Camera m_Camera = new Camera();
 
-  private final LimeLight m_LimeLight = new LimeLight();
+  private final Limelight m_LimeLight = new Limelight();
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);

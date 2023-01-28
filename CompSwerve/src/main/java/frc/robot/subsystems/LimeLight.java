@@ -4,11 +4,15 @@
 
 package frc.robot.subsystems;
 
-public class LimeLight extends Thread {
-  /** Creates a new LimeLight. */
-  public LimeLight() {
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
-    
+public class Limelight extends Thread {
+  /** Creates a new LimeLight. */
+  public Limelight() {
+   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    //public NetworkTableEntry tx = table.getEntry("tx");
   }
 
 }
