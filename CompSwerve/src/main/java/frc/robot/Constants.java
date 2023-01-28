@@ -38,4 +38,10 @@ public final class Constants {
 
     public static final int kImageWidth = 640;
     public static final int kImageHeight = 480;
+
+    public static final int kStageOneChannel = 0;
+    public static final int kStageTwoChannel = 0;
+    public static final int kStageOneLength = 0;
+    public static final int kStageTwoLength = 0;
+    public static final int kWristChannel = 0;
 }

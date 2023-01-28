@@ -8,9 +8,10 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveWithGamepad;
-import frc.robot.subsystems.Camera;
-import frc.robot.subsystems.DetectorAprilTag;
+//import frc.robot.subsystems.Camera;
+//import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.SwerveModule;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -26,12 +27,14 @@ public class RobotContainer {
   //Subsystems
   private final Drivetrain m_Drivetrain = new Drivetrain();
 
-  private final Camera m_camera = new Camera();
+  //private final Camera m_Camera = new Camera();
+
+  private final LimeLight m_LimeLight = new LimeLight();
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
 
-  private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_camera);
+  //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -40,7 +43,7 @@ public class RobotContainer {
     configureBindings();
   }
   public void robotInit() {
-    m_apriltag.start();
+   // m_apriltag.start();
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
