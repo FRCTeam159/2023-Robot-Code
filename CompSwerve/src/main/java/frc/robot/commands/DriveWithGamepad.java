@@ -11,6 +11,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 
 import static frc.robot.Constants.*;
+import frc.robot.subsystems.Limelight;
 
 /** An example command that uses an example subsystem. */
 public class DriveWithGamepad extends CommandBase {
@@ -45,6 +46,7 @@ public class DriveWithGamepad extends CommandBase {
   @Override
   public void execute() {
     driveWithJoystick(true);
+    testLimelight();
   }
 
   // Called once the command ends or is interrupted.
@@ -76,5 +78,17 @@ public class DriveWithGamepad extends CommandBase {
     m_drive.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
     // m_swerve.driveForwardAll(xSpeed);
     // m_swerve.turnAroundAll(rot);
+  }
+  public void testLimelight() {
+    if (m_controller.getAButtonPressed()) {
+      Limelight.setMode(Limelight.April);
+    } else if (m_controller.getBButtonPressed()) {
+      Limelight.setMode(Limelight.Post);
+    } else if (m_controller.getXButtonPressed()) {
+      Limelight.setMode(Limelight.Box);
+    } else if (m_controller.getYButtonPressed()) {
+      Limelight.setMode(Limelight.Cone);
+    }
+
   }
 }

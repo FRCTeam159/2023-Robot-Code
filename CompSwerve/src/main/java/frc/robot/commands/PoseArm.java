@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Arm;
 
 public class PoseArm extends CommandBase {
-  public Arm m_Arm = new Arm();
+  public Arm m_Arm;
   /** Creates a new PoseArm. */
   public PoseArm(Arm arm) {
     m_Arm = arm;
