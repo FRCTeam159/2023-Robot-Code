@@ -7,7 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.Autos;
-import frc.robot.commands.DriveToAprilTag;
+import frc.robot.commands.DriveToTarget;
 import frc.robot.commands.DriveWithGamepad;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
@@ -35,7 +35,6 @@ public class RobotContainer {
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
 
   //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
 
@@ -64,6 +63,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_Drivetrain, m_Controller);
+    return new DriveToTarget(m_Drivetrain);
   }
 }

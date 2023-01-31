@@ -17,9 +17,12 @@ import frc.robot.subsystems.TargetMgr.TagTarget;
 
 public class Limelight extends Thread {
   final static NetworkTableInstance inst = NetworkTableInstance.getDefault();
-  final static NetworkTable table = inst.getTable("limelight");
-  final NetworkTableEntry botPoseNTE = table.getEntry("botPose");
-  final NetworkTableEntry tidNTE = table.getEntry("tid");
+  final static NetworkTable limelightTable = inst.getTable("limelight");
+  final NetworkTableEntry botposeNTE = limelightTable.getEntry("botpose");
+  final NetworkTableEntry tidNTE = limelightTable.getEntry("tid");
+  final static NetworkTableEntry txNTE = limelightTable.getEntry("tx");
+  final NetworkTableEntry tyNTE = limelightTable.getEntry("ty");
+  final NetworkTableEntry taNTE = limelightTable.getEntry("ta");
 
   public static final int None = 0;
   public static final int April = 1;
@@ -30,11 +33,15 @@ public class Limelight extends Thread {
 
   static int currentMode = None;
 
-  double botPose[] = botPoseNTE.getDoubleArray(new double[0]);
-  double tid = tidNTE.getDouble(0);
+  double botpose[] = botposeNTE.getDoubleArray(new double[6]);
+  double tid = tidNTE.getDouble(-1);
   public static Pose3d botCoords;
   public static Pose3d tagCoords;
   public int tagID;
+  public static double tx;
+  public static double ty;
+  public static double ta;
+
 
   /** Creates a new LimeLight. */
   public Limelight() {
@@ -72,15 +79,26 @@ public class Limelight extends Thread {
   }
 
   private void getAprilTarget() {
-    haveTarget = true;
+    botpose = botposeNTE.getDoubleArray(new double[-1]);
+    if (botpose.length != 0) {
+      haveTarget = true;
+    }
   }
 
   private void getConeTarget() {
-    haveTarget = true;
+    tx = txNTE.getDouble(-1);
+    if (tx != -1) {
+    ta = taNTE.getDouble(-1);
+      haveTarget = true;
+    }
   }
 
   private void getBoxTarget() {
+  tx = txNTE.getDouble(-1);
+  if (tx != -1) {
+    ta = taNTE.getDouble(-1);
     haveTarget = true;
+  }
   }
 
   private void notargets() {
@@ -97,7 +115,7 @@ public class Limelight extends Thread {
   }
 
   void calculateApril() {
-    botCoords = updateBotPose(botPose);
+    botCoords = updateBotPose(botpose);
     tagID = (int) updateApril() - 1;
     ArrayList<TagTarget> temp = TargetMgr.targets;
     tagCoords = temp.get(tagID).getPose();
@@ -105,7 +123,7 @@ public class Limelight extends Thread {
 
   public static void setMode(int m) {
     currentMode = m;
-    table.getEntry("pipeline").setNumber(m);
+    limelightTable.getEntry("pipeline").setNumber(m);
     System.out.println("mode: " + m);
 
   }
