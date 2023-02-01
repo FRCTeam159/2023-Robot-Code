@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 
+import javax.swing.Box;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,6 +16,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.subsystems.TargetMgr.TagTarget;
+import static frc.robot.Constants.*;
 
 public class Limelight extends Thread {
   final static NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -24,14 +27,14 @@ public class Limelight extends Thread {
   final NetworkTableEntry tyNTE = limelightTable.getEntry("ty");
   final NetworkTableEntry taNTE = limelightTable.getEntry("ta");
 
-  public static final int None = 0;
-  public static final int April = 1;
-  public static final int Box = 2;
-  public static final int Cone = 3;
-  public static final int Post = 4;
+  public static final int None = 5;
+  public static final int April = 0;
+  public static final int Box = 1;
+  public static final int Cone = 2;
+  public static final int Post = 3;
   public static boolean haveTarget = false;
 
-  static int currentMode = None;
+  public static int currentMode = Box;
 
   double botpose[] = botposeNTE.getDoubleArray(new double[6]);
   double tid = tidNTE.getDouble(-1);
@@ -41,6 +44,7 @@ public class Limelight extends Thread {
   public static double tx;
   public static double ty;
   public static double ta;
+  public static double targetArea;
 
 
   /** Creates a new LimeLight. */
@@ -68,6 +72,7 @@ public class Limelight extends Thread {
             getAprilTarget();
             break;
           case Post:
+            getPostTarget();
             break;
 
         }
@@ -88,7 +93,8 @@ public class Limelight extends Thread {
   private void getConeTarget() {
     tx = txNTE.getDouble(-1);
     if (tx != -1) {
-    ta = taNTE.getDouble(-1);
+      ta = taNTE.getDouble(-1);
+      targetArea = kConeTargetArea;
       haveTarget = true;
     }
   }
@@ -97,8 +103,16 @@ public class Limelight extends Thread {
   tx = txNTE.getDouble(-1);
   if (tx != -1) {
     ta = taNTE.getDouble(-1);
+    targetArea = kBoxTargetArea;
     haveTarget = true;
   }
+  }
+  private void getPostTarget() {
+    if (tx != -1) {
+      ta = taNTE.getDouble(-1);
+      targetArea = kPostTargetArea;
+      haveTarget = true;
+    }
   }
 
   private void notargets() {
