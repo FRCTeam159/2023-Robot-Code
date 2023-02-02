@@ -6,6 +6,9 @@
     "mode": "Client (NT4)",
     "serverTeam": "159"
   },
+  "Persistent Values": {
+    "open": false
+  },
   "retained": {
     "limelight": {
       "open": true

@@ -25,6 +25,8 @@ import static frc.robot.Constants.*;
 public class Drivetrain extends SubsystemBase {
   public static double dely = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
   public static double delx = Units.inchesToMeters(0.5 * kFrontWheelBase);
+  public static double kMaxAcceleration = 1.0;
+  public static double kMaxVelocity = 1.0;
 
   private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
   private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
@@ -150,6 +152,9 @@ public class Drivetrain extends SubsystemBase {
     m_poseEstimator.resetPosition(getGyroAngle(),
         m_positions,
         new Pose2d(0, 0, new Rotation2d()));
+  }
+  public Pose2d getPose(){
+    return m_poseEstimator.getEstimatedPosition();
   }
 
   //TODO quick fix for autos error remove when auto is programmed

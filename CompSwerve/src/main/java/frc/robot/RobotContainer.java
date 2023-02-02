@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveToAprilTag;
 import frc.robot.commands.DriveWithGamepad;
+import frc.robot.subsystems.Autonomous;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
@@ -16,6 +17,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.subsystems.TargetMgr;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Autonomous;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -28,6 +30,7 @@ public class RobotContainer {
   private final XboxController m_Controller = new XboxController(0);
   //Subsystems
   private final Drivetrain m_Drivetrain = new Drivetrain();
+  private final Autonomous m_auto = new Autonomous(m_Drivetrain);
 
   //private final Camera m_Camera = new Camera();
   private final TargetMgr m_TargetMgr = new TargetMgr();
@@ -36,6 +39,7 @@ public class RobotContainer {
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
   private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
+  
 
   //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
 
@@ -64,6 +68,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_Drivetrain, m_Controller);
+    //return Autos.exampleAuto(m_Drivetrain, m_Controller);
+    return m_auto.getCommand();
   }
 }
