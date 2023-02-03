@@ -11,11 +11,15 @@ import static frc.robot.Constants.*;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import com.revrobotics.RelativeEncoder;
 
 public class Arm extends SubsystemBase {
   public CANSparkMax stageOne;
+  public RelativeEncoder encoderOne;
   public CANSparkMax stageTwo;
+  public RelativeEncoder encoderTwo;
   public CANSparkMax wrist;
+  public RelativeEncoder encoderWrist;
   //TODO tune PID
   public PIDController onePID = new PIDController(1, 0, 0);
   public PIDController twoPID = new PIDController(1, 0, 0);
@@ -24,8 +28,12 @@ public class Arm extends SubsystemBase {
   /** Creates a new Arm. */
   public Arm() {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    encoderOne = stageOne.getEncoder();
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    encoderTwo = stageTwo.getEncoder();
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    encoderWrist = wrist.getEncoder();
+
   }
 
   // Input x and y, returns 3 angles for the 3 parts of the arm
@@ -39,7 +47,27 @@ public class Arm extends SubsystemBase {
     return angles;
   }
 
-  public void setAngle(double x, double y, double wrist) {}
+  public void setAngle(double x, double y) {
+    double[] target = calculateAngle(x, y);
+    double wristTarget = target[0]+target[1];
+    double oneOut = onePID.calculate(encoderWrist.getPosition(), target[0]);
+    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]);
+    double wristOut = wristPID.calculate(encoderWrist.getPosition(), wristTarget);
+    stageOne.setVoltage(oneOut);
+    stageTwo.setVoltage(twoOut);
+    wrist.setVoltage(wristOut);
+  }
+
+  public void setAngle(double x, double y, double a) {
+    double[] target = calculateAngle(x, y);
+    double wristTarget = a;
+    double oneOut = onePID.calculate(encoderWrist.getPosition(), target[0]);
+    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]);
+    double wristOut = wristPID.calculate(encoderWrist.getPosition(), wristTarget);
+    stageOne.setVoltage(oneOut);
+    stageTwo.setVoltage(twoOut);
+    wrist.setVoltage(wristOut);
+  }
 
   @Override
   public void periodic() {

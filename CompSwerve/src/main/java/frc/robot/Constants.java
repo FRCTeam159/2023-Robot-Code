@@ -44,4 +44,8 @@ public final class Constants {
     public static final int kStageOneLength = 0;
     public static final int kStageTwoLength = 0;
     public static final int kWristChannel = 0;
+
+    public static final double kBoxTargetArea = 17;
+    public static final double kConeTargetArea = 12;
+    public static final double kPostTargetArea = 2;
 }
