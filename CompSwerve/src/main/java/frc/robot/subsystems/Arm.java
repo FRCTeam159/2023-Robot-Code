@@ -5,9 +5,10 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
+
+import java.util.ArrayList;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -25,15 +26,20 @@ public class Arm extends SubsystemBase {
   public PIDController twoPID = new PIDController(1, 0, 0);
   public PIDController wristPID = new PIDController(1, 0, 0);
 
-  /** Creates a new Arm. */
-  public Arm() {
+  public ArrayList<double[]> targetFeeder = new ArrayList<double[]>();
+
+  /** Creates a new Arm. 
+   @param m_Limelight **/
+  public Arm(Limelight m_Limelight) {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderOne = stageOne.getEncoder();
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderTwo = stageTwo.getEncoder();
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderWrist = wrist.getEncoder();
-
+    onePID.setTolerance(1);
+    twoPID.setTolerance(1);
+    wristPID.setTolerance(1);
   }
 
   // Input x and y, returns 3 angles for the 3 parts of the arm
@@ -47,10 +53,17 @@ public class Arm extends SubsystemBase {
     return angles;
   }
 
+  public double[] getAngle(){
+    double alpha = encoderOne.getPosition();
+    double beta = encoderTwo.getPosition();
+    return new double[] {kStageOneLength*Math.cos(alpha) + kStageTwoLength*Math.cos(beta - Math.PI + alpha), 
+      kStageOneLength*Math.sin(alpha) + kStageTwoLength*Math.sin(beta - Math.PI + alpha)};
+  }
+
   public void setAngle(double x, double y) {
     double[] target = calculateAngle(x, y);
     double wristTarget = target[0]+target[1];
-    double oneOut = onePID.calculate(encoderWrist.getPosition(), target[0]);
+    double oneOut = onePID.calculate(encoderOne.getPosition(), target[0]);
     double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]);
     double wristOut = wristPID.calculate(encoderWrist.getPosition(), wristTarget);
     stageOne.setVoltage(oneOut);
@@ -67,6 +80,24 @@ public class Arm extends SubsystemBase {
     stageOne.setVoltage(oneOut);
     stageTwo.setVoltage(twoOut);
     wrist.setVoltage(wristOut);
+  }
+
+  public boolean armAtSetPoint(){
+    return onePID.atSetpoint() && twoPID.atSetpoint() && wristPID.atSetpoint();
+  }
+
+  public void runFeed(){
+    if(targetFeeder.get(0).length < 2){
+      setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1]);
+      if(armAtSetPoint()){
+        targetFeeder.remove(0);
+      }
+    } else {
+      setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1], targetFeeder.get(0)[2]);
+      if(armAtSetPoint()){
+        targetFeeder.remove(0);
+      }
+    }
   }
 
   @Override

@@ -10,6 +10,8 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DriveToAprilTag;
 import frc.robot.commands.DriveToTarget;
 import frc.robot.commands.DriveWithGamepad;
+import frc.robot.commands.PoseArm;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Autonomous;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
@@ -36,10 +38,11 @@ public class RobotContainer {
   //private final Camera m_Camera = new Camera();
   private final TargetMgr m_TargetMgr = new TargetMgr();
   public final Limelight m_Limelight = new Limelight();
+  private final Arm m_Arm = new Arm(m_Limelight);
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-
+  private final PoseArm m_PoseArm = new PoseArm(m_Arm);
   private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
   
 
