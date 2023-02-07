@@ -48,7 +48,7 @@ public class Arm extends SubsystemBase {
   public double[] calculateAngle(double x, double y) {
     double[] point = {x, y};
     double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-    double alpha = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(distance, 2)-Math.pow(kStageTwoLength, 2))/(2*kStageOneLength*distance))+Math.atan(point[1]/point[2]); // Stage 1 to ground angle
+    double alpha = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(distance, 2)-Math.pow(kStageTwoLength, 2))/(2*kStageOneLength*distance))+Math.atan(point[0]/point[1]); // Stage 1 to ground angle
     double beta = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(kStageTwoLength, 2)-Math.pow(distance, 2))/(2*kStageTwoLength*kStageOneLength)); // Top angle
 
     double[] angles = {alpha, beta};
@@ -65,8 +65,8 @@ public class Arm extends SubsystemBase {
   public void setAngle(double x, double y) {
     double[] target = calculateAngle(x, y);
     double wristTarget = target[0]+target[1];
-    double oneOut = onePID.calculate(encoderOne.getPosition(), target[0]);
-    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]);
+    double oneOut = onePID.calculate(encoderOne.getPosition(), target[0]/(2*Math.PI));
+    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]/(2*Math.PI));
     double wristOut = wristPID.calculate(encoderWrist.getPosition(), wristTarget);
     stageOne.setVoltage(oneOut);
     stageTwo.setVoltage(twoOut);
@@ -76,8 +76,8 @@ public class Arm extends SubsystemBase {
   public void setAngle(double x, double y, double a) {
     double[] target = calculateAngle(x, y);
     double wristTarget = a;
-    double oneOut = onePID.calculate(encoderWrist.getPosition(), target[0]);
-    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]);
+    double oneOut = onePID.calculate(encoderWrist.getPosition(), target[0]/(2*Math.PI));
+    double twoOut = twoPID.calculate(encoderTwo.getPosition(), target[1]/(2*Math.PI));
     double wristOut = wristPID.calculate(encoderWrist.getPosition(), wristTarget);
     stageOne.setVoltage(oneOut);
     stageTwo.setVoltage(twoOut);
@@ -89,10 +89,12 @@ public class Arm extends SubsystemBase {
   }
 
   public void runFeed(){
-    if(targetFeeder.get(0).length < 2){
+    if(targetFeeder.get(0).length < 3){
       setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1]);
+      System.out.println("going to: " + targetFeeder.get(0));
       if(armAtSetPoint() && targetFeeder.size() > 1){
         targetFeeder.remove(0);
+        System.out.println("popping feed");
       }
     } else {
       setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1], targetFeeder.get(0)[2]);
@@ -112,6 +114,7 @@ public class Arm extends SubsystemBase {
   public void posTrim(double r){
     double x = getPosition()[0];
     double y = getPosition()[1];
+    System.out.println("trimming");
     targetFeeder.add(new double[] {x + Math.cos(r), y + Math.sin(r)});
   }
 
