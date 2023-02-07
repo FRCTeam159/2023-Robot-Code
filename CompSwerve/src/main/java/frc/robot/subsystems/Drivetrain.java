@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 import static frc.robot.Constants.*;
 
@@ -35,16 +36,19 @@ public class Drivetrain extends SubsystemBase {
 
   public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
 
-  private final SwerveModule m_frontLeft = new SwerveModule(3, 7, 9);
-  private final SwerveModule m_frontRight = new SwerveModule(4, 8, 12);
-  private final SwerveModule m_backLeft = new SwerveModule(2, 6, 10);
-  private final SwerveModule m_backRight = new SwerveModule(1, 5, 11);
+  private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn, kFl_Encoder);
+  private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn, kFr_Encoder);
+  private final SwerveModule m_backLeft = new SwerveModule(kBr_Drive, kBr_Turn, kBr_Encoder);
+  private final SwerveModule m_backRight = new SwerveModule(kBl_Drive, kBl_Turn, kBl_Encoder);
+
+  private final Field2d m_Field2d = new Field2d();
 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
       new SwerveModulePosition(), new SwerveModulePosition() };
 
   public Drivetrain() {
+    SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
     m_frontLeft.setOffset(kFrontLeftOffset);
@@ -134,6 +138,7 @@ public class Drivetrain extends SubsystemBase {
   public void updateOdometry() {
     updatePositions();
     m_poseEstimator.update(getGyroAngle(), m_positions);
+    m_Field2d.setRobotPose(getPose());
 
     // Also apply vision measurements. We use 0.3 seconds in the past as an example
     // -- on
@@ -172,4 +177,6 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
+
+
 }

@@ -42,7 +42,7 @@ public class Arm extends SubsystemBase {
     wristPID.setTolerance(1);
   }
 
-  // Input x and y, returns 3 angles for the 3 parts of the arm
+  // Input x and y (relative to bas of stage 1), returns 2 angles for the 2 stages of the arm
   public double[] calculateAngle(double x, double y) {
     double[] point = {x, y};
     double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
@@ -53,7 +53,7 @@ public class Arm extends SubsystemBase {
     return angles;
   }
 
-  public double[] getAngle(){
+  public double[] getPosition(){
     double alpha = encoderOne.getPosition();
     double beta = encoderTwo.getPosition();
     return new double[] {kStageOneLength*Math.cos(alpha) + kStageTwoLength*Math.cos(beta - Math.PI + alpha), 
@@ -89,15 +89,22 @@ public class Arm extends SubsystemBase {
   public void runFeed(){
     if(targetFeeder.get(0).length < 2){
       setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1]);
-      if(armAtSetPoint()){
+      if(armAtSetPoint() && targetFeeder.size() > 1){
         targetFeeder.remove(0);
       }
     } else {
       setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1], targetFeeder.get(0)[2]);
-      if(armAtSetPoint()){
+      if(armAtSetPoint() && targetFeeder.size() > 1){
         targetFeeder.remove(0);
       }
     }
+  }
+
+  //various position codes
+
+  // holding position
+  public void posHolding(){
+    targetFeeder.add(new double[] {0.1, 0.1});
   }
 
   @Override

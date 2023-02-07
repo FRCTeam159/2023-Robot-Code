@@ -48,7 +48,7 @@ public class DrivePath extends CommandBase {
   @Override
   public void initialize() {
     System.out.println("DRIVEPATH_INIT");
-
+    
     maxV=Drivetrain.kMaxVelocity;
     maxA=Drivetrain.kMaxAcceleration;
 
@@ -87,7 +87,7 @@ public class DrivePath extends CommandBase {
     try {
       PathPlannerTrajectory trajectory = PathPlanner.loadPath("Example path", 
         new PathConstraints(Drivetrain.kMaxVelocity,Drivetrain.kMaxAcceleration)); // max vel & accel
-
+    
       Pose2d p0 = trajectory.getInitialPose();
 
       // Pathplanner sets 0,0 as the lower left hand corner (FRC field coord system) 
@@ -103,6 +103,7 @@ public class DrivePath extends CommandBase {
       return trajectory;
     } catch (Exception ex) {
       System.out.println("failed to create pathweaver trajectory");
+      ex.printStackTrace();
       return null;
     }
   }
