@@ -31,7 +31,7 @@ public final class Constants {
     public static final double kBackLeftOffset = 138.2;
     public static final double kBackRightOffset = 64.3;
 
-    public static final double kFrontWheelBase = 23.22; // distance beteen front wheels
+    public static final double kFrontWheelBase = 23.22; // distance bewteen front wheels
 	public static final double kSideWheelBase = 23.22;  // distance beteen side wheels
 
     public static final int kImageWidth = 640;
@@ -41,8 +41,8 @@ public final class Constants {
     public static final double kConeTargetArea = 12;
     public static final double kPostTargetArea = 2;
 
-    public static final int kStageOneLength = 0;
-    public static final int kStageTwoLength = 0;
+    public static final double kStageOneLength = Units.inchesToMeters(43.18);
+    public static final double kStageTwoLength = Units.inchesToMeters(30.59);
 
     public static final int  kFl_Drive = 3;
     public static final int kFl_Turn = 7;
@@ -66,7 +66,7 @@ public final class Constants {
 
     // public static final int 
 
-    public static final Object[][] modes = { //1st letter is operation P-pickup D-Dropoff; 2nd letter is type C-cone, B-box; 3rd letter is location B-bottom M-middle T-top
+    public static final Object[][] modes = { //1st letter is operation P-pickup, D-Dropoff; 2nd letter is type C-cone, B-box; 3rd letter is location B-bottom, M-middle T-top
         {"PCB", 0, 10, 2}, //modes[x][1] is y-target on camera; modes[x][2] is area-target; modes[x][3] is target type (refer to limelight subsys)
         {"PCM", 0, 10, 2},
         {"PBB", 0, 10, 1},

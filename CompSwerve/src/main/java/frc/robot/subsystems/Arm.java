@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
@@ -27,10 +28,11 @@ public class Arm extends SubsystemBase {
   public PIDController wristPID = new PIDController(1, 0, 0);
 
   public ArrayList<double[]> targetFeeder = new ArrayList<double[]>();
+  XboxController m_Controller;
 
   /** Creates a new Arm. 
    @param m_Limelight **/
-  public Arm(Limelight m_Limelight) {
+  public Arm(Limelight limelight) {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderOne = stageOne.getEncoder();
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -105,6 +107,12 @@ public class Arm extends SubsystemBase {
   // holding position
   public void posHolding(){
     targetFeeder.add(new double[] {0.1, 0.1});
+  }
+
+  public void posTrim(double r){
+    double x = getPosition()[0];
+    double y = getPosition()[1];
+    targetFeeder.add(new double[] {x + Math.cos(r), y + Math.sin(r)});
   }
 
   @Override

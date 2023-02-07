@@ -42,7 +42,7 @@ public class RobotContainer {
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final PoseArm m_PoseArm = new PoseArm(m_Arm);
+  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller);
   private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
   
 
