@@ -91,7 +91,6 @@ public class Arm extends SubsystemBase {
   public void runFeed(){
     if(targetFeeder.get(0).length < 3){
       setAngle(targetFeeder.get(0)[0], targetFeeder.get(0)[1]);
-      System.out.println("going to: " + targetFeeder.get(0));
       if(armAtSetPoint() && targetFeeder.size() > 1){
         targetFeeder.remove(0);
         System.out.println("popping feed");
@@ -108,7 +107,7 @@ public class Arm extends SubsystemBase {
 
   // holding position
   public void posHolding(){
-    targetFeeder.add(new double[] {0.1, 0.1});
+    targetFeeder.add(new double[] {1, 0.5});
   }
 
   public void posTrim(double r){
