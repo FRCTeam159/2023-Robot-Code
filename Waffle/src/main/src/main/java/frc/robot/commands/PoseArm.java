@@ -4,38 +4,36 @@
 
 package frc.robot.commands;
 
-import java.util.ArrayList;
+import java.util.concurrent.RunnableFuture;
 
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.spline.PoseWithCurvature;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Limelight;
-import frc.robot.subsystems.TargetMgr;
-import frc.robot.subsystems.TargetMgr.TagTarget;
+import frc.robot.subsystems.Arm;
 
-public class DriveToAprilTag extends CommandBase {
-  public Limelight m_Limelight;
-  public TargetMgr m_TargetMgr;
-  public Drivetrain m_drive;
-  
-  /** Creates a new DriveToAprilTag. */
-  public DriveToAprilTag(Limelight limelight, TargetMgr targetMgr, Drivetrain drive) {
-    m_Limelight = limelight;
-    m_TargetMgr = targetMgr;
-    m_drive = drive;
-
-    addRequirements(targetMgr);
+public class PoseArm extends CommandBase {
+  public Arm m_Arm;
+  public XboxController m_Controller;
+  /** Creates a new PoseArm. */
+  public PoseArm(Arm arm, XboxController controller) {
+    m_Arm = arm;
+    m_Controller = controller;
+    addRequirements(arm);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_Arm.posHolding();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
-    
+    int direction = m_Controller.getPOV(1);
+    m_Arm.posTrim(Units.degreesToRadians(direction));
+    m_Arm.runFeed();
   }
 
   // Called once the command ends or is interrupted.
