@@ -55,7 +55,7 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setOffset(kFrontRightOffset);
     m_backLeft.setOffset(kBackLeftOffset);
     m_backRight.setOffset(kBackRightOffset);
-    m_frontLeft.setInverted();
+    m_frontRight.setInverted();
     m_backLeft.setInverted();
     resetOdometry();
   }
@@ -160,6 +160,19 @@ public class Drivetrain extends SubsystemBase {
   }
   public Pose2d getPose(){
     return m_poseEstimator.getEstimatedPosition();
+  }
+
+  public void driveForwardAll(double dist) {
+    m_backLeft.driveForward(dist);
+    m_backRight.driveForward(dist);
+    m_frontLeft.driveForward(dist);
+    m_frontRight.driveForward(dist);
+  }
+  public void turnAroundAll(double dist) {
+    m_backLeft.turnAround(dist);
+    m_backRight.turnAround(dist);
+    m_frontLeft.turnAround(dist);
+    m_frontRight.turnAround(dist);
   }
 
   //TODO quick fix for autos error remove when auto is programmed

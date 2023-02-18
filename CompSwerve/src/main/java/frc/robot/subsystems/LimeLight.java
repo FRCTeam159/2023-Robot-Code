@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.TargetMgr.TagTarget;
 import static frc.robot.Constants.*;
 
@@ -76,8 +77,8 @@ public class Limelight extends Thread {
           case Post:
             getPostTarget();
             break;
-
         }
+        SmartDashboard.putNumber("tx",tx);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }

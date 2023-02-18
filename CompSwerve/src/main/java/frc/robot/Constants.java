@@ -15,6 +15,8 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    static public final boolean flagWaffle = false;
+
     static public final double kDriveGearRatio=6.75;  // MK4i drive (standard)
     static public final double kTurnGearRatio=21.429; // MK4i turn (all)
   
@@ -31,8 +33,8 @@ public final class Constants {
     public static final double kBackLeftOffset = 138.2;
     public static final double kBackRightOffset = 64.3;
 
-    public static final double kFrontWheelBase = 23.22; // distance bewteen front wheels
-	public static final double kSideWheelBase = 23.22;  // distance beteen side wheels
+    public static final double kFrontWheelBase = flagWaffle? 23.22: 18.625; // distance bewteen front wheels (in)
+	public static final double kSideWheelBase = flagWaffle? 23.22: 31;  // distance beteen side wheels (in)
 
     public static final int kImageWidth = 640;
     public static final int kImageHeight = 480;

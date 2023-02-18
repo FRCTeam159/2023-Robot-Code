@@ -17,6 +17,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
@@ -29,11 +34,16 @@ import com.revrobotics.RelativeEncoder;
 import static frc.robot.Constants.*;
 
 public class SwerveModule extends SubsystemBase {
-  private final CANSparkMax m_driveMotor;
-  private final CANSparkMax m_turningMotor;
+  //private final CANSparkMax m_driveMotor;
+  //private final CANSparkMax m_turningMotor;
 
-  private final RelativeEncoder m_driveEncoder;
+  private final WPI_TalonFX m_fDriveMotor;
+  private final WPI_TalonFX m_fTurningMotor;
+
+  //private final RelativeEncoder m_driveEncoder;
   private final CANCoder m_turningEncoder;
+
+  private final TalonFXSensorCollection m_fDriveEncoder;
 
   public static boolean debug = true;
   String name;
@@ -72,8 +82,10 @@ public class SwerveModule extends SubsystemBase {
     m_motorChannel = driveMotorChannel;
     //TODO do we need this: m_turnChannel = turningMotorChannel;
     SmartDashboard.putString("mod" + m_motorChannel, "");
-    m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
-    m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    //m_driveMotor =  new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    //m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
+    m_fDriveMotor = new WPI_TalonFX(driveMotorChannel);
+    m_fTurningMotor = new WPI_TalonFX(turningMotorChannel);
 
     name = Drivetrain.chnlnames[m_motorChannel - 1];
 
@@ -81,9 +93,11 @@ public class SwerveModule extends SubsystemBase {
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
 
-    m_driveEncoder = m_driveMotor.getEncoder();
-    m_driveEncoder.setPositionConversionFactor(kDistPerRot); // inches to meters
-    m_driveEncoder.setVelocityConversionFactor(kDistPerRot / 60); // convert RPM to meters per second
+    //m_driveEncoder = m_driveMotor.getEncoder();
+    m_fDriveEncoder = m_fDriveMotor.getSensorCollection();
+
+    //m_driveEncoder.setPositionConversionFactor(kDistPerRot); // inches to meters
+    //m_driveEncoder.setVelocityConversionFactor(kDistPerRot / 60); // convert RPM to meters per second
 
     // Set the distance (in this case, angle) in radians per pulse for the turning
     // encoder.
@@ -112,7 +126,7 @@ public class SwerveModule extends SubsystemBase {
 
   public void reset(){
     SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
-    m_driveEncoder.setPosition(0);
+    //m_driveEncoder.setPosition(0);
     //m_turningEncoder.setPosition(0);
     cnt=0;
   }
@@ -133,7 +147,7 @@ public class SwerveModule extends SubsystemBase {
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(
-        m_driveEncoder.getVelocity(), getRotation2d());
+        getVelocity(), getRotation2d());
   }
 
   /**
@@ -143,15 +157,15 @@ public class SwerveModule extends SubsystemBase {
    */
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        m_driveEncoder.getPosition(), getRotation2d());
+        m_fDriveEncoder.getIntegratedSensorPosition(), getRotation2d());
   }
 
   public double getDistance(){
-    return m_driveEncoder.getPosition();
+     return m_fDriveEncoder.getIntegratedSensorPosition();
   }
 
   public double getVelocity() {
-      return m_driveEncoder.getVelocity();
+      return m_fDriveEncoder.getIntegratedSensorVelocity();
   }
   /**
    * Sets the desired state for the module.
@@ -164,6 +178,7 @@ public class SwerveModule extends SubsystemBase {
     SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
 
     double velocity=getVelocity();
+    double position=getDistance();
     // Calculate the drive output from the drive PID controller.
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
     double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
@@ -177,13 +192,14 @@ public class SwerveModule extends SubsystemBase {
     double set_drive=driveOutput+driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;;
 
-    m_driveMotor.setVoltage(set_drive);
-    m_turningMotor.setVoltage(set_turn);
+    m_fDriveMotor.set(ControlMode.PercentOutput, set_drive);
+    //m_fTurningMotor.set(ControlMode.PercentOutput ,set_turn);
     
     if(debug){
-      String s = String.format("Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 
-      velocity,state.speedMetersPerSecond,set_drive,Math.toDegrees(turn_angle), state.angle.getDegrees(), set_turn); 
+      String s = String.format("POS:%-1.2f Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 
+      position, velocity,state.speedMetersPerSecond,set_drive,Math.toDegrees(turn_angle), state.angle.getDegrees(), set_turn); 
       SmartDashboard.putString(name, s);
+
       // if((cnt%10)==0){
       //     System.out.println(name+" "+s);
       // }
@@ -204,7 +220,14 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void setInverted(){
-    m_driveMotor.setInverted(true);
+    m_fDriveMotor.setInverted(true);
+  }
+
+  public void driveForward(double dist) {
+    m_fDriveMotor.set(ControlMode.PercentOutput, dist);
+  }
+  public void turnAround(double dist) {
+    m_fTurningMotor.set(ControlMode.PercentOutput, dist);
   }
 
   /**

@@ -1,4 +1,7 @@
 {
+  "Clients": {
+    "open": true
+  },
   "Connections": {
     "open": true
   },
@@ -6,12 +9,30 @@
     "mode": "Client (NT4)",
     "serverTeam": "159"
   },
-  "Persistent Values": {
-    "open": false
+  "Server": {
+    "Publishers": {
+      "open": true
+    },
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "outlineviewer": {
+    "Subscribers": {
+      "open": true
+    }
   },
   "retained": {
     "limelight": {
       "open": true
+    }
+  },
+  "transitory": {
+    "SmartDashboard": {
+      "Field": {
+        "open": true
+      }
     }
   }
 }
