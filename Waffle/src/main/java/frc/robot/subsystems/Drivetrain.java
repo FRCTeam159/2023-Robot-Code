@@ -4,11 +4,12 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.WPI_Pigeon2;
+//import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.VecBuilder;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 import static frc.robot.Constants.*;
@@ -36,12 +38,16 @@ public class Drivetrain extends SubsystemBase {
 
   public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
 
-  private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn, kFl_Encoder);
-  private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn, kFr_Encoder);
-  private final SwerveModule m_backLeft = new SwerveModule(kBr_Drive, kBr_Turn, kBr_Encoder);
-  private final SwerveModule m_backRight = new SwerveModule(kBl_Drive, kBl_Turn, kBl_Encoder);
+  private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn,1);
+  private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn,2);
+  private final SwerveModule m_backLeft = new SwerveModule(kBr_Drive, kBr_Turn,3);
+  private final SwerveModule m_backRight = new SwerveModule(kBl_Drive, kBl_Turn, 4);
 
   private final Field2d m_Field2d = new Field2d();
+
+  static int count = 0;
+  //private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
+  private AnalogGyro m_gyro = new AnalogGyro(0);
 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
@@ -51,12 +57,15 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
-    m_frontLeft.setOffset(kFrontLeftOffset);
-    m_frontRight.setOffset(kFrontRightOffset);
-    m_backLeft.setOffset(kBackLeftOffset);
-    m_backRight.setOffset(kBackRightOffset);
+    // m_frontLeft.setOffset(kFrontLeftOffset);
+    // m_frontRight.setOffset(kFrontRightOffset);
+    // m_backLeft.setOffset(kBackLeftOffset);
+    // m_backRight.setOffset(kBackRightOffset);
+    // m_frontRight.setInverted();
+    // m_backRight.setInverted();
     m_frontLeft.setInverted();
     m_backLeft.setInverted();
+
     resetOdometry();
   }
 
@@ -80,9 +89,7 @@ public class Drivetrain extends SubsystemBase {
     m_positions[3] = m_backRight.getPosition();
   }
 
-  static int count = 0;
-  private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
-
+  
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
 
@@ -127,7 +134,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void log() {
-    SmartDashboard.putNumber("pigeon", m_gyro.getAngle());
+    SmartDashboard.putNumber("heading", m_gyro.getAngle());
     // m_frontLeft.log();
     // m_frontRight.log();
     // m_backLeft.log();
@@ -148,7 +155,6 @@ public class Drivetrain extends SubsystemBase {
     // ExampleGlobalMeasurementSensor.getEstimatedGlobalPose(
     // m_poseEstimator.getEstimatedPosition()),
     // Timer.getFPGATimestamp() - 0.3);
-
     
   }
 
@@ -163,21 +169,26 @@ public class Drivetrain extends SubsystemBase {
     return m_poseEstimator.getEstimatedPosition();
   }
 
-  //TODO quick fix for autos error remove when auto is programmed
-  public CommandBase exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public void driveForwardAll(double dist) {
+    m_backLeft.driveForward(dist);
+    m_backRight.driveForward(dist);
+    m_frontLeft.driveForward(dist);
+    m_frontRight.driveForward(dist);
   }
-
+  public void turnAroundAll(double dist) {
+    m_backLeft.turnAround(dist);
+    m_backRight.turnAround(dist);
+    m_frontLeft.turnAround(dist);
+    m_frontRight.turnAround(dist);
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
 
+public Command exampleMethodCommand() {
+	return null;
+}
 
 }

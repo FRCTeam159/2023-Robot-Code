@@ -13,7 +13,7 @@ public final class Autos {
   /** Example static factory for an autonomous command. */
   //TODO tacky fix for autos remove when actual code is here
   public static CommandBase exampleAuto(Drivetrain subsystem, XboxController m_Controller) {
-    return Commands.sequence(subsystem.exampleMethodCommand(), new DriveWithGamepad(subsystem, m_Controller));
+    return null;
   }
 
   private Autos() {

@@ -33,18 +33,20 @@ public class SwerveModule extends SubsystemBase {
   private final CANSparkMax m_turningMotor;
 
   private final RelativeEncoder m_driveEncoder;
-  private final CANCoder m_turningEncoder;
+  private final RelativeEncoder m_turningEncoder;
 
   public static boolean debug = true;
   String name;
 
   int cnt = 0;
 
+  boolean m_inverted = false;
+
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(2, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-      10,
+      1,
       0,
       0,
       new TrapezoidProfile.Constraints(
@@ -65,17 +67,22 @@ public class SwerveModule extends SubsystemBase {
    * @param turningMotorChannel PWM output for the turning motor.
    * @param turningEncoder
    */
+
+  private int m_id;
   public SwerveModule(
       int driveMotorChannel,
       int turningMotorChannel,
-      int turningEncoder) {
+      int id) {
     m_motorChannel = driveMotorChannel;
-    //TODO do we need this: m_turnChannel = turningMotorChannel;
+
+    m_id = id;
+
     SmartDashboard.putString("mod" + m_motorChannel, "");
     m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    name = Drivetrain.chnlnames[m_motorChannel - 1];
+    name = Drivetrain.chnlnames[m_id - 1];
+    SmartDashboard.putString(name, "Working");
 
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
@@ -86,22 +93,9 @@ public class SwerveModule extends SubsystemBase {
     m_driveEncoder.setVelocityConversionFactor(kDistPerRot / 60); // convert RPM to meters per second
 
     // Set the distance (in this case, angle) in radians per pulse for the turning
-    // encoder.
-    // CANcoder API wants offsets to always be set in degrees but (optionally)
-    // angles returned in radians
-
-    m_turningEncoder = new CANCoder(turningEncoder);
-
-    CANCoderConfiguration config = new CANCoderConfiguration();
-    // set units of the CANCoder to radians, with velocity being radians per second
-    config.sensorCoefficient = 2 * Math.PI / kEncoderResolution; // 4096 for CANcoder
-    config.unitString = "rad";
-    config.sensorTimeBase = SensorTimeBase.PerSecond; // set timebase to seconds
-    config.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180; // should avoid discontinuity at 0 degrees or
-                                                                          // 360
-    // config.absoluteSensorRange=AbsoluteSensorRange.Unsigned_0_to_360;
-    config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
-    m_turningEncoder.configAllSettings(config);
+    m_turningEncoder = m_turningMotor.getEncoder();
+    m_turningEncoder.setPositionConversionFactor(kRadiansPerRot); // inches to meters
+    m_turningEncoder.setVelocityConversionFactor(kRadiansPerRot / 60); // convert RPM to meters per second
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
@@ -111,19 +105,17 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void reset(){
-    SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
+    SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
-    //m_turningEncoder.setPosition(0);
+    m_turningEncoder.setPosition(0);
     cnt=0;
   }
   public double heading(){
-    return m_turningEncoder.getAbsolutePosition();
-  }
-  public double cummulativeAngle(){
     return m_turningEncoder.getPosition();
   }
+  
   public Rotation2d getRotation2d() {
-    return Rotation2d.fromRadians(cummulativeAngle());
+    return Rotation2d.fromRadians(heading());
   }
 
   /**
@@ -177,7 +169,7 @@ public class SwerveModule extends SubsystemBase {
     double set_drive=driveOutput+driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;;
 
-    m_driveMotor.setVoltage(set_drive);
+    driveForward(set_drive);
     m_turningMotor.setVoltage(set_turn);
     
     if(debug){
@@ -195,18 +187,25 @@ public class SwerveModule extends SubsystemBase {
     String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
     getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
     SmartDashboard.putString(name, s);
-    //if(name.equals("FL"))
-   // System.out.println(s);
   }
 
-  public void setOffset(double offset) {
-    m_turningEncoder.configMagnetOffset(offset,20);
-  }
+  // public void setOffset(double offset) {
+  //   m_turningEncoder.configMagnetOffset(offset,20);
+  // }
 
   public void setInverted(){
-    m_driveMotor.setInverted(true);
+    m_inverted = true;
+    //m_driveMotor.setInverted(true);
   }
-
+  
+  public void driveForward(double dist) {
+    dist = m_inverted? -dist: dist;
+    m_driveMotor.setVoltage(dist);
+  }
+  public void turnAround(double dist) {
+    dist = m_inverted? -dist: dist;
+    m_turningMotor.setVoltage(dist);
+  }
   /**
    * Example command factory method.
    *

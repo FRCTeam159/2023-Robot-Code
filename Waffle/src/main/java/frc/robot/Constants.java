@@ -21,18 +21,19 @@ public final class Constants {
     public static final double kWheelRadius = 4;
     public static final int kEncoderResolution = 4096;
     public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
+    public static final double kRadiansPerRot = Units.inchesToMeters(Math.PI * 2)/kTurnGearRatio;
 
     public static final double kMaxSpeed = 4; // 4 meters per second
     public static final double kMaxAngularSpeed = 12 * Math.PI; // 3 rotation per second
     public static final double kMaxAngularAcceleration = 6*Math.PI; // 1 rotations/s/s
 
-    public static final double kFrontLeftOffset = -7.3;
-    public static final double kFrontRightOffset = 74.5;
-    public static final double kBackLeftOffset = 138.2;
-    public static final double kBackRightOffset = 64.3;
+    // public static final double kFrontLeftOffset = -7.3;
+    // public static final double kFrontRightOffset = 74.5;
+    // public static final double kBackLeftOffset = 138.2;
+    // public static final double kBackRightOffset = 64.3;
 
-    public static final double kFrontWheelBase = 23.22; // distance bewteen front wheels
-	public static final double kSideWheelBase = 23.22;  // distance beteen side wheels
+    public static final double kFrontWheelBase = 19; // distance bewteen front wheels
+	public static final double kSideWheelBase = 15;  // distance beteen side wheels
 
     public static final int kImageWidth = 640;
     public static final int kImageHeight = 480;
@@ -44,21 +45,17 @@ public final class Constants {
     public static final double kStageOneLength = Units.inchesToMeters(43.18);
     public static final double kStageTwoLength = Units.inchesToMeters(30.59);
 
-    public static final int  kFl_Drive = 3;
+    public static final int kFl_Drive = 3;
     public static final int kFl_Turn = 8;
-    public static final int kFl_Encoder = 9;
 
-    public static final int  kFr_Drive = 7;
+    public static final int kFr_Drive = 7;
     public static final int kFr_Turn = 6;
-    public static final int kFr_Encoder = 12;
 
-    public static final int  kBr_Drive = 2;
+    public static final int kBr_Drive = 2;
     public static final int kBr_Turn = 1;
-    public static final int kBr_Encoder = 10;
 
-    public static final int  kBl_Drive = 2;
+    public static final int kBl_Drive = 5;
     public static final int kBl_Turn = 4;   
-    public static final int kBl_Encoder = 11;
 
     public static final int kSpareSpark = 9;    
 
