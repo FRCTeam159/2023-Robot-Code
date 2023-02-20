@@ -24,6 +24,7 @@ public final class Constants {
     public static final int kEncoderResolution = 4096;
     public static final int kFalconResolution = 2048*10;
     public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
+    public static final double kMetersPerSecToTalonVelocity = 409.6/kDistPerRot;
 
     public static final double kMaxSpeed = 4; // 4 meters per second
     public static final double kMaxAngularSpeed = 12 * Math.PI; // 3 rotation per second

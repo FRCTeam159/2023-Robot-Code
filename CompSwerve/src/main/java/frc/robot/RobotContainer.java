@@ -50,7 +50,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_Drivetrain.setDefaultCommand(new DriveWithGamepad(m_Drivetrain, m_Controller));
+    m_Drivetrain.setDefaultCommand(m_Gamepad);
     // Configure the button bindings
     configureBindings();
   }

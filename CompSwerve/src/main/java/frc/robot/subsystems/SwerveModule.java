@@ -53,10 +53,10 @@ public class SwerveModule extends SubsystemBase {
   int cnt = 0;
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(2, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.5, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-      10,
+      0.0,
       0,
       0,
       new TrapezoidProfile.Constraints(
@@ -65,7 +65,7 @@ public class SwerveModule extends SubsystemBase {
   //private final PIDController m_turningPIDController = new PIDController(7, 0, 0);
 
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.6);
 
   private int m_motorChannel;
 
@@ -186,7 +186,9 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void setVelocity(double v) {
-    m_fDriveMotor.set(ControlMode.Velocity, v);
+    m_fDriveMotor.set(ControlMode.PercentOutput, v);
+    //m_fDriveMotor.set(ControlMode.Velocity, v * kFalconResolution / kDistPerRot);
+    // System.out.println("???" + kMetersPerSecToTalonVelocity );
   }
   /**
    * Sets the desired state for the module.
@@ -201,6 +203,7 @@ public class SwerveModule extends SubsystemBase {
     double velocity=getVelocity();
     double position=getDistance();
     // Calculate the drive output from the drive PID controller.
+    //System.out.printf("Current velocity: %1.2f, Current position: %1.2f, state.speed: %1.2f, state.angle: %1.2f \n", velocity, position, state.speedMetersPerSecond, state.angle.getRadians());
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
     double driveFeedforward = 0; //m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
@@ -208,7 +211,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Calculate the turning motor output from the turning PID controller.
     double turnOutput = -m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
-    double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
+    double turnFeedforward = -m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     double set_drive=driveOutput+driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;
@@ -216,7 +219,7 @@ public class SwerveModule extends SubsystemBase {
 
 
     setVelocity(set_drive);
-    //m_fTurningMotor.set(ControlMode.PercentOutput, set_turn);
+    m_fTurningMotor.set(ControlMode.PercentOutput, set_turn);
     
     if(debug){
       String s = String.format("POS:%-1.2f Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 

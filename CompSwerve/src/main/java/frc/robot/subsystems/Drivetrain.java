@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import static frc.robot.Constants.*;
 
 public class Drivetrain extends SubsystemBase {
-  public static double dely = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
-  public static double delx = Units.inchesToMeters(0.5 * kFrontWheelBase);
+  public static double delx = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
+  public static double  dely= Units.inchesToMeters(0.5 * kFrontWheelBase);
   public static double kMaxAcceleration = 1.0;
   public static double kMaxVelocity = 1.0;
 
@@ -55,7 +55,7 @@ public class Drivetrain extends SubsystemBase {
     // m_frontRight.setOffset(kFrontRightOffset);
     // m_backLeft.setOffset(kBackLeftOffset);
     // m_backRight.setOffset(kBackRightOffset);
-    m_frontRight.setInverted();
+    m_frontLeft.setInverted();
     m_backLeft.setInverted();
     resetOdometry();
   }
@@ -124,6 +124,7 @@ public class Drivetrain extends SubsystemBase {
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
     updateOdometry();
+    // System.out.println(xSpeed + ""+ ySpeed + "" + rot + "" + fieldRelative + "");
     // log();
   }
 
@@ -133,6 +134,7 @@ public class Drivetrain extends SubsystemBase {
     // m_frontRight.log();
     // m_backLeft.log();
     // m_backRight.log();
+
   }
 
   /** Updates the field relative position of the robot. */
