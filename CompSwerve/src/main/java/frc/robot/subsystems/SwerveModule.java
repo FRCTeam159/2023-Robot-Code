@@ -45,7 +45,9 @@ public class SwerveModule extends SubsystemBase {
 
   private final TalonFXSensorCollection m_fDriveEncoder;
 
-  public static boolean debug = true;
+  public static boolean debug = false;
+  private double m_motorEncoderOffset;
+
   String name;
 
   int cnt = 0;
@@ -78,16 +80,19 @@ public class SwerveModule extends SubsystemBase {
   public SwerveModule(
       int driveMotorChannel,
       int turningMotorChannel,
-      int turningEncoder) {
+      int turningEncoder,
+      double turningEncoderOffset) {
     m_motorChannel = driveMotorChannel;
     //TODO do we need this: m_turnChannel = turningMotorChannel;
-    SmartDashboard.putString("mod" + m_motorChannel, "");
+    //SmartDashboard.putString("mod" + m_motorChannel, "");
+    
     //m_driveMotor =  new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     //m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_fDriveMotor = new WPI_TalonFX(driveMotorChannel);
     m_fTurningMotor = new WPI_TalonFX(turningMotorChannel);
 
     name = Drivetrain.chnlnames[m_motorChannel - 1];
+    SmartDashboard.putString(name, "thing that should work");
 
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
@@ -115,6 +120,7 @@ public class SwerveModule extends SubsystemBase {
                                                                           // 360
     // config.absoluteSensorRange=AbsoluteSensorRange.Unsigned_0_to_360;
     config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+    config.magnetOffsetDegrees = turningEncoderOffset;
     m_turningEncoder.configAllSettings(config);
 
     // Limit the PID Controller's input range between -pi and pi and set the input
@@ -125,10 +131,13 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void reset(){
-    SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
+    //SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + m_turningEncoder.getAbsolutePosition()); 
     //m_driveEncoder.setPosition(0);
     //m_turningEncoder.setPosition(0);
-    cnt=0;
+    m_motorEncoderOffset = m_fDriveEncoder.getIntegratedSensorPosition();
+
+
+    //cnt=0;
   }
   public double heading(){
     return m_turningEncoder.getAbsolutePosition();
@@ -157,15 +166,27 @@ public class SwerveModule extends SubsystemBase {
    */
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        m_fDriveEncoder.getIntegratedSensorPosition(), getRotation2d());
+        getDistance(), getRotation2d());
   }
-
+  //meters
   public double getDistance(){
-     return m_fDriveEncoder.getIntegratedSensorPosition();
+     return (getEncoderPosition()/kFalconResolution)*kDistPerRot;
   }
 
+  private double getEncoderPosition(){
+    return (m_fDriveEncoder.getIntegratedSensorPosition()-m_motorEncoderOffset);
+  }
+  //rps
   public double getVelocity() {
-      return m_fDriveEncoder.getIntegratedSensorVelocity();
+      return (m_fDriveEncoder.getIntegratedSensorVelocity()/kFalconResolution)*kDistPerRot;
+  }
+
+  public double getRotations() {
+    return (getEncoderPosition()/kFalconResolution);
+  }
+
+  public void setVelocity(double v) {
+    m_fDriveMotor.set(ControlMode.Velocity, v);
   }
   /**
    * Sets the desired state for the module.
@@ -181,7 +202,7 @@ public class SwerveModule extends SubsystemBase {
     double position=getDistance();
     // Calculate the drive output from the drive PID controller.
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
-    double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
+    double driveFeedforward = 0; //m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     double turn_angle=getRotation2d().getRadians();
 
@@ -190,10 +211,12 @@ public class SwerveModule extends SubsystemBase {
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     double set_drive=driveOutput+driveFeedforward;
-    double set_turn=turnOutput+turnFeedforward;;
+    double set_turn=turnOutput+turnFeedforward;
 
-    m_fDriveMotor.set(ControlMode.PercentOutput, set_drive);
-    //m_fTurningMotor.set(ControlMode.PercentOutput ,set_turn);
+
+
+    setVelocity(set_drive);
+    //m_fTurningMotor.set(ControlMode.PercentOutput, set_turn);
     
     if(debug){
       String s = String.format("POS:%-1.2f Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 
@@ -208,8 +231,8 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void log() {
-    String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
-    getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
+    String s = String.format("Drive:%-1.2f m Rotations:%-1.2f Angle:%-4.1f Abs:%-4.1f deg, AbsRad:%-4.1f\n", 
+    getDistance(), getRotations(), getRotation2d().getDegrees(), Math.toDegrees(cummulativeAngle()), heading());
     SmartDashboard.putString(name, s);
     //if(name.equals("FL"))
    // System.out.println(s);
@@ -239,6 +262,9 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (!debug) {
+      log();
+    }
   }
 
   @Override
