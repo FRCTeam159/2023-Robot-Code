@@ -68,6 +68,9 @@ public final class Constants {
     public static final int kStageTwoChannel = 14;
     public static final int kWristChannel = 15;
 
+    public static final int kClawMotorID1 = 0;
+    public static final int kClawMotorID2 = 0;
+
     // public static final int 
 
     public static final Object[][] modes = { //1st letter is operation P-pickup, D-Dropoff; 2nd letter is type C-cone, B-box; 3rd letter is location B-bottom, M-middle T-top

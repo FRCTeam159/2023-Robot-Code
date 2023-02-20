@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import frc.robot.subsystems.Claw;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.math.MathUtil;
@@ -47,6 +48,8 @@ public class DriveWithGamepad extends CommandBase {
   public void execute() {
     driveWithJoystick(true);
     testLimelight();
+    //testClaw();
+
   }
 
   // Called once the command ends or is interrupted.
@@ -81,14 +84,26 @@ public class DriveWithGamepad extends CommandBase {
   }
   public void testLimelight() {
     if (m_controller.getAButtonPressed()) {
-      Limelight.setMode(Limelight.April);
+      if (DriveToTarget.getMode() == 0) {
+      DriveToTarget.setMode(1);
+      } else {
+        DriveToTarget.setMode(3);
+      }
     } else if (m_controller.getBButtonPressed()) {
-      Limelight.setMode(Limelight.Post);
-    } else if (m_controller.getXButtonPressed()) {
-      Limelight.setMode(Limelight.Box);
-    } else if (m_controller.getYButtonPressed()) {
-      Limelight.setMode(Limelight.Cone);
-    }
 
+    } else if (m_controller.getXButtonPressed()) {
+
+    } else if (m_controller.getYButtonPressed()) {
+
+    }
+  }
+  public void testClaw() {
+    if (m_controller.getBButtonPressed()) {
+      Claw.clawMotorState(2);
+      //Claw.clawSolenoidState(true);
+    } else if (m_controller.getXButtonPressed()) {
+      Claw.clawMotorState(3);
+      //Claw.clawSolenoidState(false);
+    }
   }
 }

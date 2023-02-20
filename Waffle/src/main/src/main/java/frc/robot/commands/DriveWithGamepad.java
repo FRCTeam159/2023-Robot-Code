@@ -81,14 +81,19 @@ public class DriveWithGamepad extends CommandBase {
   }
   public void testLimelight() {
     if (m_controller.getAButtonPressed()) {
-      Limelight.setMode(Limelight.April);
+      if (DriveToTarget.getMode() == 0) {
+      DriveToTarget.setMode(1);
+      } else {
+        DriveToTarget.setMode(3);
+      }
     } else if (m_controller.getBButtonPressed()) {
-      Limelight.setMode(Limelight.Post);
+
     } else if (m_controller.getXButtonPressed()) {
-      Limelight.setMode(Limelight.Box);
+
     } else if (m_controller.getYButtonPressed()) {
-      Limelight.setMode(Limelight.Cone);
+
+    }
     }
 
   }
-}
+
