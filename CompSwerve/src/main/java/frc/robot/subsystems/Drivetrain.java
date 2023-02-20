@@ -34,12 +34,12 @@ public class Drivetrain extends SubsystemBase {
   private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
   private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
 
-  public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
+  public static String chnlnames[] = { "BL", "BR", "FL", "FR" };
 
-  private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn, kFl_Encoder);
-  private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn, kFr_Encoder);
-  private final SwerveModule m_backLeft = new SwerveModule(kBr_Drive, kBr_Turn, kBr_Encoder);
-  private final SwerveModule m_backRight = new SwerveModule(kBl_Drive, kBl_Turn, kBl_Encoder);
+  private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn, kFl_Encoder, kFrontLeftOffset);
+  private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn, kFr_Encoder, kFrontRightOffset);
+  private final SwerveModule m_backLeft = new SwerveModule(kBl_Drive, kBl_Turn, kBl_Encoder, kBackLeftOffset);
+  private final SwerveModule m_backRight = new SwerveModule(kBr_Drive, kBr_Turn, kBr_Encoder, kBackRightOffset);
 
   private final Field2d m_Field2d = new Field2d();
 
@@ -51,10 +51,10 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
-    m_frontLeft.setOffset(kFrontLeftOffset);
-    m_frontRight.setOffset(kFrontRightOffset);
-    m_backLeft.setOffset(kBackLeftOffset);
-    m_backRight.setOffset(kBackRightOffset);
+    // m_frontLeft.setOffset(kFrontLeftOffset);
+    // m_frontRight.setOffset(kFrontRightOffset);
+    // m_backLeft.setOffset(kBackLeftOffset);
+    // m_backRight.setOffset(kBackRightOffset);
     m_frontRight.setInverted();
     m_backLeft.setInverted();
     resetOdometry();
@@ -66,6 +66,7 @@ public class Drivetrain extends SubsystemBase {
     m_backLeft.reset();
     m_backRight.reset();
     updatePositions();
+    
   }
 
   public void reset() {
