@@ -48,6 +48,8 @@ public final class Constants {
     public static final double kStageOneLength = Units.inchesToMeters(43.18);
     public static final double kStageTwoLength = Units.inchesToMeters(30.59);
 
+
+    // SWERVE CAN IDS
     public static final int kFl_Drive = 3;
     public static final int kFl_Turn = 7;
     public static final int kFl_Encoder = 10;
@@ -64,7 +66,7 @@ public final class Constants {
     public static final int kBl_Turn = 5;
     public static final int kBl_Encoder = 11;
 
-    public static final int kStageOneChannel = 13;
+    public static final int kStageOneChannel = 16;
     public static final int kStageTwoChannel = 14;
     public static final int kWristChannel = 15;
 

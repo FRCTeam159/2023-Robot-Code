@@ -53,19 +53,22 @@ public class SwerveModule extends SubsystemBase {
   int cnt = 0;
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(0.5, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(
+      0.1,
+      0,
+      0);
 
   private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
+      1.0,
+      3.0,
       0.0,
-      0,
-      0,
       new TrapezoidProfile.Constraints(
           kMaxAngularSpeed, kMaxAngularAcceleration));
 
   //private final PIDController m_turningPIDController = new PIDController(7, 0, 0);
 
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.6);
+  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.05, 0.0);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.05, 0.0);
 
   private int m_motorChannel;
 
@@ -205,7 +208,7 @@ public class SwerveModule extends SubsystemBase {
     // Calculate the drive output from the drive PID controller.
     //System.out.printf("Current velocity: %1.2f, Current position: %1.2f, state.speed: %1.2f, state.angle: %1.2f \n", velocity, position, state.speedMetersPerSecond, state.angle.getRadians());
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
-    double driveFeedforward = 0; //m_driveFeedforward.calculate(state.speedMetersPerSecond);
+    double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     double turn_angle=getRotation2d().getRadians();
 
