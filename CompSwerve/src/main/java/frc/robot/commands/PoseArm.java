@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.concurrent.RunnableFuture;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,15 +26,21 @@ public class PoseArm extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_Arm.posHolding();
+    // DISABLED FOR TESTING 
+    // m_Arm.posHolding();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    int direction = m_Controller.getPOV(1);
-    m_Arm.posTrim(Units.degreesToRadians(direction));
-    m_Arm.runFeed();
+    // for testing: gentle velocity control of the arm
+    double testVelocity = -1.0 * MathUtil.applyDeadband(m_Controller.getRightY(), 0.2);
+    System.out.println("Setting arm speed: " + testVelocity);
+    m_Arm.stageOne.set(testVelocity);
+
+    //int direction = m_Controller.getPOV(1);
+    //m_Arm.posTrim(Units.degreesToRadians(direction));
+    //m_Arm.runFeed();
   }
 
   // Called once the command ends or is interrupted.
