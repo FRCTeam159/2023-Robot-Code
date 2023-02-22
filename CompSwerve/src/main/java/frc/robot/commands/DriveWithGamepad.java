@@ -4,7 +4,7 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.Claw;
+//import frc.robot.subsystems.Claw;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.math.MathUtil;
@@ -19,6 +19,7 @@ public class DriveWithGamepad extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final XboxController m_controller;
   private final Drivetrain m_drive;
+  //private final Claw m_claw;
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
@@ -97,13 +98,13 @@ public class DriveWithGamepad extends CommandBase {
 
     }
   }
-  public void testClaw() {
-    if (m_controller.getBButtonPressed()) {
-      Claw.clawMotorState(2);
-      //Claw.clawSolenoidState(true);
-    } else if (m_controller.getXButtonPressed()) {
-      Claw.clawMotorState(3);
-      //Claw.clawSolenoidState(false);
-    }
-  }
+  // public void testClaw() {
+  //   if (m_controller.getBButtonPressed()) {
+  //     Claw.clawMotorState(2);
+  //     //Claw.clawSolenoidState(true);
+  //   } else if (m_controller.getXButtonPressed()) {
+  //     Claw.clawMotorState(3);
+  //     //Claw.clawSolenoidState(false);
+  //   }
+  // }
 }
