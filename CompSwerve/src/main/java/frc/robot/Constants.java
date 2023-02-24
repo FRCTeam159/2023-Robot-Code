@@ -67,11 +67,11 @@ public final class Constants {
     public static final int kBl_Encoder = 11;
 
     public static final int kStageOneChannel = 16;
-    public static final int kStageTwoChannel = 14;
-    public static final int kWristChannel = 15;
+    public static final int kStageTwoChannel = 0;//set later
+    public static final int kWristChannel = 13;
 
-    public static final int kClawMotorID1 = 0;
-    public static final int kClawMotorID2 = 0;
+    public static final int kClawMotorID1 = 15;
+    public static final int kClawMotorID2 = 14;
 
     // public static final int 
 

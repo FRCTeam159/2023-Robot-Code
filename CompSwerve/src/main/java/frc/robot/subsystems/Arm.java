@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
@@ -42,6 +43,7 @@ public class Arm extends SubsystemBase {
     onePID.setTolerance(1);
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
+    SmartDashboard.putNumber("armboi", -10000);
   }
 
   // // Input x and y (relative to bas of stage 1), returns 2 angles for the 2 stages of the arm
@@ -116,8 +118,15 @@ public class Arm extends SubsystemBase {
     targetFeeder.add(new ArmPosition(pos.xPos + Math.cos(r), pos.yPos + Math.sin(r), ArmPosition.consType.pose));
   }
 
+  public void log() {
+    SmartDashboard.putNumber("armboi", encoderOne.getPosition());
+    SmartDashboard.putNumber("volty", stageOne.getAppliedOutput());
+    SmartDashboard.putNumber("wristy", encoderWrist.getPosition());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
   }
 }

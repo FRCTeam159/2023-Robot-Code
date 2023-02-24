@@ -13,6 +13,7 @@ import frc.robot.commands.DriveWithGamepad;
 import frc.robot.commands.PoseArm;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Autonomous;
+import frc.robot.subsystems.Claw;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
@@ -39,10 +40,11 @@ public class RobotContainer {
   private final TargetMgr m_TargetMgr = new TargetMgr();
   public final Limelight m_Limelight = new Limelight();
   private final Arm m_Arm = new Arm(m_Limelight);
+  private final Claw m_Claw = new Claw();
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller);
+  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller, m_Claw);
   private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
   
 
@@ -51,6 +53,9 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_Drivetrain.setDefaultCommand(m_Gamepad);
+    m_Arm.setDefaultCommand(m_PoseArm);
+    
+    
     // Configure the button bindings
     configureBindings();
   }
