@@ -25,7 +25,7 @@ import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
-import frc.robot.subsystems.Averager;
+//import frc.robot.subsystems.Averager;
 
 import static frc.robot.Constants.*;
 
@@ -60,7 +60,7 @@ public class SwerveModule extends SubsystemBase {
   private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
 
   private int m_motorChannel;
-  Averager m_averager = new Averager(5);
+  //Averager m_averager = new Averager(5);
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder
@@ -109,7 +109,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void reset(){
-    m_averager.reset();
+    //m_averager.reset();
     SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
