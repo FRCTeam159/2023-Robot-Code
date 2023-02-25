@@ -16,7 +16,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
 
-public class Arm extends SubsystemBase {
+public class Arm extends Thread{
   public CANSparkMax stageOne;
   public RelativeEncoder encoderOne;
   public CANSparkMax stageTwo;
@@ -33,7 +33,7 @@ public class Arm extends SubsystemBase {
 
   /** Creates a new Arm. 
    @param m_Limelight **/
-  public Arm(Limelight limelight) {
+  public Arm() {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderOne = stageOne.getEncoder();
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -44,25 +44,8 @@ public class Arm extends SubsystemBase {
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
     SmartDashboard.putNumber("armboi", -10000);
+    SmartDashboard.putNumber("wristy", 0);
   }
-
-  // // Input x and y (relative to bas of stage 1), returns 2 angles for the 2 stages of the arm
-  // public double[] calculateAngle(double x, double y) {
-  //   double[] point = {x, y};
-  //   double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-  //   double alpha = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(distance, 2)-Math.pow(kStageTwoLength, 2))/(2*kStageOneLength*distance))+Math.atan(point[0]/point[1]); // Stage 1 to ground angle
-  //   double beta = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(kStageTwoLength, 2)-Math.pow(distance, 2))/(2*kStageTwoLength*kStageOneLength)); // Top angle
-
-  //   double[] angles = {alpha, beta};
-  //   return angles;
-  // }
-
-  // public double[] getPosition(){
-  //   double alpha = encoderOne.getPosition();
-  //   double beta = encoderTwo.getPosition();
-  //   return new double[] {kStageOneLength*Math.cos(alpha) + kStageTwoLength*Math.cos(beta - Math.PI + alpha), 
-  //     kStageOneLength*Math.sin(alpha) + kStageTwoLength*Math.sin(beta - Math.PI + alpha)};
-  // }
 
   public void setAngle(double x, double y) {
     ArmPosition target =  new ArmPosition(x, y, ArmPosition.consType.pose);
@@ -88,10 +71,10 @@ public class Arm extends SubsystemBase {
     return onePID.atSetpoint() && twoPID.atSetpoint() && wristPID.atSetpoint();
   }
 
-  public void runFeed(){
+  private void runFeed(){
     if(!targetFeeder.get(0).hasWrist){
       setAngle(targetFeeder.get(0).oneAngle, targetFeeder.get(0).twoAngle);
-      System.out.println("going to: " + targetFeeder.get(0));
+      //System.out.println("going to: " + targetFeeder.get(0));
       if(armAtSetPoint() && targetFeeder.size() > 1){
         targetFeeder.remove(0);
         System.out.println("popping feed");
@@ -109,7 +92,8 @@ public class Arm extends SubsystemBase {
 
   // holding position
   public void posHolding(){
-    targetFeeder.add(new ArmPosition(0.1, 0.1, ArmPosition.consType.pose));
+    targetFeeder.set(0, new ArmPosition(0.1, 0.1, ArmPosition.consType.pose));
+    System.out.println("pos is holding");
   }
 
   public void posTrim(double r){
@@ -120,13 +104,22 @@ public class Arm extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("armboi", encoderOne.getPosition());
-    SmartDashboard.putNumber("volty", stageOne.getAppliedOutput());
     SmartDashboard.putNumber("wristy", encoderWrist.getPosition());
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    log();
+  public void run(){
+    posHolding();
+    while (!Thread.interrupted()){
+      try{
+        Thread.sleep(50);
+        log();
+        //runFeed();
+      }
+      catch(Exception ex){
+        System.out.println("exception: " + ex);
+      }
+    }
   }
+
+
 }

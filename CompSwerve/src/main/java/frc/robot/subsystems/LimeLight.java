@@ -57,6 +57,7 @@ public class Limelight extends Thread {
 
   public void run() {
     // do something
+    
     while (!Thread.interrupted()) {
       try {
         Thread.sleep(20);
@@ -81,6 +82,7 @@ public class Limelight extends Thread {
         SmartDashboard.putNumber("tx",tx);
       } catch (InterruptedException e) {
         e.printStackTrace();
+       
       }
     }
   }
@@ -140,7 +142,7 @@ public class Limelight extends Thread {
   public static void setMode(int m) {
     currentMode = m;
     limelightTable.getEntry("pipeline").setNumber(m);
-    System.out.println("mode: " + m);
+    //System.out.println("mode: " + m);
 
   }
 

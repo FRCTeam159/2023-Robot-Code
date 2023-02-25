@@ -28,28 +28,32 @@ public class Claw extends SubsystemBase {
   public static CANSparkMax m_clawMotor1;
   public static CANSparkMax m_clawMotor2;
 
-  private static DoubleSolenoid m_clawSolenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 4);
-  private static DoubleSolenoid m_clawSolenoid2 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 5, 6);
+  private static DoubleSolenoid m_clawSolenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 2, 3);
+  private static DoubleSolenoid m_clawSolenoid2 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 5, 4);
 
   /** Creates a new Claw. */
   public Claw() {
     m_clawMotor1 = new CANSparkMax(kClawMotorID1, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_clawMotor2 = new CANSparkMax(kClawMotorID2, CANSparkMaxLowLevel.MotorType.kBrushless); // can't measure
+    m_clawMotor1.setInverted(true);
     m_encoderLeft = m_clawMotor1.getEncoder();
     m_encoderRight = m_clawMotor2.getEncoder();
   }
 
-  public static void clawMotorState(double state) {
-    if (state >= -1 && state <= 1) {
-      m_clawMotor1.set(state);
-      m_clawMotor2.set(state);
-    } else if (state == 2.0) {// TODO these numbers are coming from nowhere change when real claw exists
-      m_clawMotor1.set(-.25); // 2 is suck in
-      m_clawMotor2.set(-.25);
-    } else if (state == 3.0) {
-      m_clawMotor1.set(.25); // 3 is eject
-      m_clawMotor2.set(-.25);
-    }
+  public void clawMotorState(double state) {
+    if(state == 0){
+      m_clawMotor1.set(0);
+      m_clawMotor2.set(0);
+    } else if(state == 1){
+      m_clawMotor1.set(-.3); // big suck
+      m_clawMotor2.set(-.3);
+    } else if(state == 2){
+      m_clawMotor1.set(-0.02); //small suck
+      m_clawMotor2.set(-0.02);
+    } else if(state == 3){
+      m_clawMotor1.set(1); //big throw
+      m_clawMotor2.set(1);
+    } 
   }
 
   public void clawSolenoidState(boolean grab) {
@@ -70,6 +74,6 @@ public class Claw extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    log();
+    //log();
   }
 }

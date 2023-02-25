@@ -8,6 +8,7 @@ import java.util.concurrent.RunnableFuture;
 
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -18,13 +19,22 @@ public class PoseArm extends CommandBase {
   public Arm m_Arm;
   public XboxController m_Controller;
   public Claw m_Claw;
-  public boolean m_ClawIn = false;
+  public m mode = m.none;
+  public enum m{
+    pickup,
+    hold,
+    drop,
+    eject,
+    none
+  };
+  public Timer tim = new Timer();
+  public double k = 0; //set to 113;
   /** Creates a new PoseArm. */
   public PoseArm(Arm arm, XboxController controller, Claw claw) {
     m_Arm = arm;
     m_Controller = controller;
     m_Claw = claw;
-    addRequirements(arm, claw);
+    //addRequirements(arm, claw);
     //SmartDashboard.putNumber("joystick", -2);
   }
 
@@ -32,6 +42,7 @@ public class PoseArm extends CommandBase {
   @Override
   public void initialize() {
     //m_Arm.posHolding();
+    tim.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,7 +50,16 @@ public class PoseArm extends CommandBase {
   public void execute() {
     double up = m_Controller.getRightTriggerAxis();
     double down = m_Controller.getLeftTriggerAxis();
-    //double wristmotorspin = 
+    if((m_Arm.encoderOne.getPosition()-k)<0){
+      m_Arm.stageOne.set(up - down);
+    } else if((m_Arm.encoderOne.getPosition()-k)>0){
+      m_Arm.stageOne.set(up);
+    }
+
+    double joy = m_Controller.getRightY();
+    m_Arm.wrist.set(joy/2);
+
+    m_Arm.log(); 
     wristTest();
 
     
@@ -52,22 +72,55 @@ public class PoseArm extends CommandBase {
   }
 
   public void wristTest() {
-    System.out.print(".");
     if (m_Controller.getBButtonPressed()) {
       System.out.print("B button");
-      if (m_ClawIn){
-        //m_Claw.clawSolenoidState(false);
-        m_ClawIn = false;
-        System.out.println("opening claw");
-      }
-      else{
-       // m_Claw.clawSolenoidState(true);
-        m_ClawIn = true;
-        System.out.println("closing claw");
-      }
-
-
+      if (mode == m.none || mode == m.eject){
+        m_Claw.clawSolenoidState(false);
+        mode = m.pickup;
+      }else if(mode == m.pickup){
+        m_Claw.clawSolenoidState(true);
+        mode = m.hold;
+      }else if (mode == m.hold){
+        m_Claw.clawSolenoidState(false);
+        mode = m.drop;
+        tim.reset();
     }
+    }
+
+    if(m_Controller.getXButtonPressed()){
+      m_Claw.clawSolenoidState(false);
+      mode = m.eject;
+      tim.reset();
+    }
+
+    switch(mode){
+      case none:
+        m_Claw.clawMotorState(0);
+        break;
+      case pickup:
+        m_Claw.clawMotorState(1);
+        break;
+      case hold:
+        m_Claw.clawMotorState(2);
+        break;
+      case drop:
+        m_Claw.clawMotorState(0);
+        break;
+      case eject:
+        m_Claw.clawMotorState(3);
+        break;
+    }
+
+    if(mode == m.drop && tim.get() > 3){
+      mode = m.none;
+      m_Claw.clawSolenoidState(true);
+    }
+
+    if(mode == m.eject && tim.get() > 0.5){
+      mode = m.none;
+      m_Claw.clawSolenoidState(true);
+    }
+
   }
 
   // Called once the command ends or is interrupted.

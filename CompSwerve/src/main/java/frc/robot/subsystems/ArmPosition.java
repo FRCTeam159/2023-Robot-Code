@@ -26,6 +26,7 @@ public class ArmPosition extends SubsystemBase {
     if(m == consType.pose){
       xPos = one;
       yPos = two;
+      System.out.println("one = " + one + "two = " + two);
       double[] temp = calculateAngle(one, two);
       oneAngle = temp[0];
       twoAngle = temp[1];
@@ -56,7 +57,7 @@ public class ArmPosition extends SubsystemBase {
     double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     double alpha = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(distance, 2)-Math.pow(kStageTwoLength, 2))/(2*kStageOneLength*distance))+Math.atan(point[0]/point[1]); // Stage 1 to ground angle
     double beta = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(kStageTwoLength, 2)-Math.pow(distance, 2))/(2*kStageTwoLength*kStageOneLength)); // Top angle
-
+    System.out.println(x + " " + y);
     double[] angles = {alpha, beta};
     return angles;
   }

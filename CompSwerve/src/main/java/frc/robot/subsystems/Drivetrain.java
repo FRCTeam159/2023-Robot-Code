@@ -130,10 +130,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("pigeon", m_gyro.getAngle());
-    // m_frontLeft.log();
-    // m_frontRight.log();
-    // m_backLeft.log();
-    // m_backRight.log();
+    m_frontLeft.log();
+    m_frontRight.log();
+    m_backLeft.log();
+    m_backRight.log();
 
   }
 
@@ -192,6 +192,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
   }
 
 
