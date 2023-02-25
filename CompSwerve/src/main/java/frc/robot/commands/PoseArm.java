@@ -20,11 +20,13 @@ public class PoseArm extends CommandBase {
   public XboxController m_Controller;
   public Claw m_Claw;
   public m mode = m.none;
+  double joy;
   public enum m{
     pickup,
     hold,
     drop,
     eject,
+    smallEject,
     none
   };
   public Timer tim = new Timer();
@@ -34,6 +36,7 @@ public class PoseArm extends CommandBase {
     m_Arm = arm;
     m_Controller = controller;
     m_Claw = claw;
+    joy = 0;
     //addRequirements(arm, claw);
     //SmartDashboard.putNumber("joystick", -2);
   }
@@ -56,8 +59,15 @@ public class PoseArm extends CommandBase {
       m_Arm.stageOne.set(up);
     }
 
-    double joy = m_Controller.getRightY();
-    m_Arm.wrist.set(joy/2);
+    if(m_Controller.getLeftBumper() && joy < 1){
+      joy= joy + 0.01;
+    }
+    if(m_Controller.getRightBumper() && joy > -1){
+      joy= joy - 0.01;
+    }
+    //m_Arm.wrist.set(joy/2);
+    m_Arm.wristPIDtest(joy);
+    //System.out.println("joy: " + joy);
 
     m_Arm.log(); 
     wristTest();
@@ -88,8 +98,14 @@ public class PoseArm extends CommandBase {
     }
 
     if(m_Controller.getXButtonPressed()){
-      m_Claw.clawSolenoidState(false);
+      m_Claw.clawSolenoidState(true);
       mode = m.eject;
+      tim.reset();
+    }
+
+    if(m_Controller.getAButtonPressed()){
+      m_Claw.clawSolenoidState(false);
+      mode = m.smallEject;
       tim.reset();
     }
 
@@ -109,6 +125,9 @@ public class PoseArm extends CommandBase {
       case eject:
         m_Claw.clawMotorState(3);
         break;
+      case smallEject:
+        m_Claw.clawMotorState(4);
+
     }
 
     if(mode == m.drop && tim.get() > 3){
@@ -117,6 +136,11 @@ public class PoseArm extends CommandBase {
     }
 
     if(mode == m.eject && tim.get() > 0.5){
+      mode = m.none;
+      m_Claw.clawSolenoidState(true);
+    }
+
+    if(mode == m.smallEject && tim.get() > 0.5){
       mode = m.none;
       m_Claw.clawSolenoidState(true);
     }

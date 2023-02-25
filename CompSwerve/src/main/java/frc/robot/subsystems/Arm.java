@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,7 +27,7 @@ public class Arm extends Thread{
   //TODO tune PID
   public PIDController onePID = new PIDController(1, 0, 0);
   public PIDController twoPID = new PIDController(1, 0, 0);
-  public PIDController wristPID = new PIDController(1, 0, 0);
+  public PIDController wristPID = new PIDController(0.8, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>();
   XboxController m_Controller;
@@ -40,7 +41,7 @@ public class Arm extends Thread{
     encoderTwo = stageTwo.getEncoder();
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderWrist = wrist.getEncoder();
-    onePID.setTolerance(1);
+    onePID.setTolerance(0.1);
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
     SmartDashboard.putNumber("armboi", -10000);
@@ -86,6 +87,13 @@ public class Arm extends Thread{
         System.out.println("popping feed");
       }
     }
+  }
+
+  //testing
+  public void wristPIDtest(double setpoint){
+    double output = wristPID.calculate(encoderWrist.getPosition()/63, setpoint);
+    wrist.set(output);
+    //System.out.println("pos " + encoderWrist.getPosition()/63 + "setpt" + setpoint + "output" + output);
   }
 
   //various position codes

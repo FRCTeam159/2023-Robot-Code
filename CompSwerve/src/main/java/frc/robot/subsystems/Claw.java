@@ -53,7 +53,10 @@ public class Claw extends SubsystemBase {
     } else if(state == 3){
       m_clawMotor1.set(1); //big throw
       m_clawMotor2.set(1);
-    } 
+    } else if(state == 4){
+      m_clawMotor1.set(0.25);
+      m_clawMotor2.set(0.25);
+    }
   }
 
   public void clawSolenoidState(boolean grab) {

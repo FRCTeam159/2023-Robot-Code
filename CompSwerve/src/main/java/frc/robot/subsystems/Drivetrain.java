@@ -51,12 +51,11 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
-    // m_frontLeft.setOffset(kFrontLeftOffset);
-    // m_frontRight.setOffset(kFrontRightOffset);
-    // m_backLeft.setOffset(kBackLeftOffset);
-    // m_backRight.setOffset(kBackRightOffset);
-    m_frontLeft.setInverted();
-    m_backLeft.setInverted();
+    m_frontLeft.setOffset(kFrontLeftOffset);
+    m_frontRight.setOffset(kFrontRightOffset);
+    m_backLeft.setOffset(kBackLeftOffset);
+    m_backRight.setOffset(kBackRightOffset);
+    m_frontRight.setInverted();
     resetOdometry();
   }
 
