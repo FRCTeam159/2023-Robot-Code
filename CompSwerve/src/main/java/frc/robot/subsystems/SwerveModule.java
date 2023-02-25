@@ -237,8 +237,8 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void log() {
-    String s = String.format("Drive:%-1.2f m Rotations:%-1.2f Angle:%-4.1f Abs:%-4.1f deg, AbsRad:%-4.1f\n", 
-    getDistance(), getRotations(), getRotation2d().getDegrees(), Math.toDegrees(cummulativeAngle()), heading());
+    String s = String.format("Drive:%-1.2f m Rotations:%-1.2f Angle:%-4.1f Abs:%-4.1f deg, Absdeg:%-4.1f\n", 
+    getDistance(), getRotations(), getRotation2d().getDegrees(), Math.toDegrees(cummulativeAngle()), Math.toDegrees(heading()));
     SmartDashboard.putString(name, s);
     //if(name.equals("FL"))
    // System.out.println(s);
@@ -268,9 +268,6 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (!debug) {
-      log();
-    }
   }
 
   @Override

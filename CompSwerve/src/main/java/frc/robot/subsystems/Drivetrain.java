@@ -51,12 +51,11 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
-    // m_frontLeft.setOffset(kFrontLeftOffset);
-    // m_frontRight.setOffset(kFrontRightOffset);
-    // m_backLeft.setOffset(kBackLeftOffset);
-    // m_backRight.setOffset(kBackRightOffset);
-    m_frontLeft.setInverted();
-    m_backLeft.setInverted();
+    m_frontLeft.setOffset(kFrontLeftOffset);
+    m_frontRight.setOffset(kFrontRightOffset);
+    m_backLeft.setOffset(kBackLeftOffset);
+    m_backRight.setOffset(kBackRightOffset);
+    m_frontRight.setInverted();
     resetOdometry();
   }
 
@@ -130,10 +129,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("pigeon", m_gyro.getAngle());
-    // m_frontLeft.log();
-    // m_frontRight.log();
-    // m_backLeft.log();
-    // m_backRight.log();
+    m_frontLeft.log();
+    m_frontRight.log();
+    m_backLeft.log();
+    m_backRight.log();
 
   }
 
@@ -192,6 +191,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
   }
 
 

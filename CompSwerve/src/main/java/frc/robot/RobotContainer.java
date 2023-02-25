@@ -14,6 +14,7 @@ import frc.robot.commands.DriveWithGamepad;
 import frc.robot.commands.PoseArm;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Autonomous;
+import frc.robot.subsystems.Claw;
 //import frc.robot.subsystems.Camera;
 //import frc.robot.subsystems.DetectorAprilTag;
 import frc.robot.subsystems.Drivetrain;
@@ -21,6 +22,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.subsystems.TargetMgr;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Autonomous;
 
 /**
@@ -37,14 +39,15 @@ public class RobotContainer {
   private final Autonomous m_auto = new Autonomous(m_Drivetrain);
 
   //private final Camera m_Camera = new Camera();
-  private final TargetMgr m_TargetMgr = new TargetMgr();
-  public final Limelight m_Limelight = new Limelight();
-  private final Arm m_Arm = new Arm(m_Limelight);
+  //private final TargetMgr m_TargetMgr = new TargetMgr();
+  //public final Limelight m_Limelight = new Limelight();
+  private final Arm m_Arm = new Arm();
+  private final Claw m_Claw = new Claw();
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller);
-  private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
+  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller, m_Claw);
+  //private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
   
 
   //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
@@ -52,12 +55,22 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_Drivetrain.setDefaultCommand(m_Gamepad);
+
+    
+    
     // Configure the button bindings
     configureBindings();
   }
   public void robotInit() {
    // m_apriltag.start();
-   m_Limelight.start();
+   //m_Limelight.start();
+
+   m_Arm.start();
+  
+  }
+
+  public void teleopInit(){
+    CommandScheduler.getInstance().schedule(new PoseArm(m_Arm, m_Controller, m_Claw));
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by

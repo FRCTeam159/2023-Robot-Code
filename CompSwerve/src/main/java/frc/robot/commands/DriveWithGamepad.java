@@ -48,7 +48,7 @@ public class DriveWithGamepad extends CommandBase {
   @Override
   public void execute() {
     driveWithJoystick(true);
-    testLimelight();
+    //testLimelight();
     //testClaw();
 
   }
@@ -83,28 +83,4 @@ public class DriveWithGamepad extends CommandBase {
     // m_drive.driveForwardAll(xSpeed);
     // m_drive.turnAroundAll(rot);
   }
-  public void testLimelight() {
-    if (m_controller.getAButtonPressed()) {
-      if (DriveToTarget.getMode() == 0) {
-      DriveToTarget.setMode(1);
-      } else {
-        DriveToTarget.setMode(3);
-      }
-    } else if (m_controller.getBButtonPressed()) {
-
-    } else if (m_controller.getXButtonPressed()) {
-
-    } else if (m_controller.getYButtonPressed()) {
-
-    }
-  }
-  // public void testClaw() {
-  //   if (m_controller.getBButtonPressed()) {
-  //     Claw.clawMotorState(2);
-  //     //Claw.clawSolenoidState(true);
-  //   } else if (m_controller.getXButtonPressed()) {
-  //     Claw.clawMotorState(3);
-  //     //Claw.clawSolenoidState(false);
-  //   }
-  // }
 }

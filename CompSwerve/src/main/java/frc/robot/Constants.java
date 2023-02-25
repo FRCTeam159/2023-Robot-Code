@@ -30,10 +30,10 @@ public final class Constants {
     public static final double kMaxAngularSpeed = 12 * Math.PI; // 3 rotation per second
     public static final double kMaxAngularAcceleration = 6*Math.PI; // 1 rotations/s/s
     //in degrees, need to be set in degrees
-    public static final double kFrontLeftOffset = -51.6;
-    public static final double kFrontRightOffset = -74.5;
-    public static final double kBackLeftOffset = -154.7;
-    public static final double kBackRightOffset = 17.2;
+    public static final double kFrontLeftOffset = -133; //-102
+    public static final double kFrontRightOffset = -107; //-151
+    public static final double kBackLeftOffset = -15; //33
+    public static final double kBackRightOffset = -23; //48
 
     public static final double kFrontWheelBase = flagWaffle? 23.22: 18.625; // distance bewteen front wheels (in)
 	public static final double kSideWheelBase = flagWaffle? 23.22: 31;  // distance beteen side wheels (in)
@@ -67,11 +67,11 @@ public final class Constants {
     public static final int kBl_Encoder = 11;
 
     public static final int kStageOneChannel = 16;
-    public static final int kStageTwoChannel = 14;
-    public static final int kWristChannel = 15;
+    public static final int kStageTwoChannel = 0;//set later
+    public static final int kWristChannel = 13;
 
-    public static final int kClawMotorID1 = 0;
-    public static final int kClawMotorID2 = 0;
+    public static final int kClawMotorID1 = 15;
+    public static final int kClawMotorID2 = 14;
 
     // public static final int 
 
