@@ -45,8 +45,8 @@ public class DriveWithGamepad extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveWithJoystick(true);
-   // testLimelight();
+    driveWithJoystick(false);
+    testLimelight();
   }
 
   // Called once the command ends or is interrupted.
@@ -75,20 +75,24 @@ public class DriveWithGamepad extends CommandBase {
     // the right by default.
     final var rot = -m_rotLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getRightX(), 0.2), 3))* kMaxAngularSpeed;
 
-    m_drive.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
+    m_drive.drive(xSpeed, ySpeed, rot, fieldRelative);
     // m_drive.driveForwardAll(xSpeed/10);
     // m_drive.turnAroundAll(rot/50);
   }
-  // public void testLimelight() {
-  //   if (m_controller.getAButtonPressed()) {
-  //   //   Limelight.setMode(Limelight.April);
-  //   // } else if (m_controller.getBButtonPressed()) {
-  //   //   Limelight.setMode(Limelight.Post);
-  //   // } else if (m_controller.getXButtonPressed()) {
-  //   //   Limelight.setMode(Limelight.Box);
-  //   // } else if (m_controller.getYButtonPressed()) {
-  //   //   Limelight.setMode(Limelight.Cone);
-  //   // }
+  public void testLimelight() {
+    if (m_controller.getAButtonPressed()) {
+      if (DriveToTarget.getMode() == DriveToTarget.driverCam){
+      DriveToTarget.setMode(DriveToTarget.looking);
+      
+      } else {
+        //DriveToTarget.setMode(3);
+      }
+    } else if (m_controller.getBButtonPressed()) {
 
+    } else if (m_controller.getXButtonPressed()) {
+
+    } else if (m_controller.getYButtonPressed()) {
+
+    }
   }
 }

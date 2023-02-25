@@ -40,8 +40,8 @@ public class Drivetrain extends SubsystemBase {
 
   private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn,1);
   private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn,2);
-  private final SwerveModule m_backLeft = new SwerveModule(kBr_Drive, kBr_Turn,3);
-  private final SwerveModule m_backRight = new SwerveModule(kBl_Drive, kBl_Turn, 4);
+  private final SwerveModule m_backRight = new SwerveModule(kBr_Drive, kBr_Turn,3);
+  private final SwerveModule m_backLeft = new SwerveModule(kBl_Drive, kBl_Turn, 4);
 
   private final Field2d m_Field2d = new Field2d();
 

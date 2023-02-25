@@ -139,7 +139,7 @@ public class Limelight extends Thread {
   public static void setMode(int m) {
     currentMode = m;
     limelightTable.getEntry("pipeline").setNumber(m);
-    System.out.println("mode: " + m);
+    //System.out.println("mode: " + m);
 
   }
 

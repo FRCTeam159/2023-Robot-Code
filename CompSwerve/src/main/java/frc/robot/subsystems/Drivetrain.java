@@ -51,12 +51,11 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putData("Field" , m_Field2d);
     m_gyro.reset();
 
-    // m_frontLeft.setOffset(kFrontLeftOffset);
-    // m_frontRight.setOffset(kFrontRightOffset);
-    // m_backLeft.setOffset(kBackLeftOffset);
-    // m_backRight.setOffset(kBackRightOffset);
-    m_frontLeft.setInverted();
-    m_backLeft.setInverted();
+    m_frontLeft.setOffset(kFrontLeftOffset);
+    m_frontRight.setOffset(kFrontRightOffset);
+    m_backLeft.setOffset(kBackLeftOffset);
+    m_backRight.setOffset(kBackRightOffset);
+    m_frontRight.setInverted();
     resetOdometry();
   }
 
@@ -82,7 +81,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   static int count = 0;
-  private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
+  public final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
