@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.commands.AutonomousTest;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveToAprilTag;
 import frc.robot.commands.DriveToTarget;
@@ -86,6 +87,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return new AutonomousTest(m_Drivetrain) ;
   }
 }

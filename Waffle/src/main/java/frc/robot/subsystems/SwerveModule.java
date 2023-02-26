@@ -25,6 +25,7 @@ import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
+import frc.robot.subsystems.Averager;
 
 import static frc.robot.Constants.*;
 
@@ -45,12 +46,13 @@ public class SwerveModule extends SubsystemBase {
   // PID controllers for drive and steer motors
   private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
 
-  private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-      1,
+  private final PIDController m_turningPIDController = new PIDController(
+      .04,
       0,
-      0,
-      new TrapezoidProfile.Constraints(
-          kMaxAngularSpeed, kMaxAngularAcceleration));
+      0
+      // new TrapezoidProfile.Constraints(
+      //     kMaxAngularSpeed, kMaxAngularAcceleration)
+      );
 
   //private final PIDController m_turningPIDController = new PIDController(7, 0, 0);
 
@@ -58,6 +60,7 @@ public class SwerveModule extends SubsystemBase {
   private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
 
   private int m_motorChannel;
+  Averager m_averager = new Averager(5);
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder
@@ -97,14 +100,16 @@ public class SwerveModule extends SubsystemBase {
     m_turningEncoder.setPositionConversionFactor(kRadiansPerRot); // inches to meters
     m_turningEncoder.setVelocityConversionFactor(kRadiansPerRot / 60); // convert RPM to meters per second
 
+
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     //TODO check example and see if this is there: 
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_turningPIDController.enableContinuousInput(-Math.PI,Math.PI);
 
   }
 
   public void reset(){
+    m_averager.reset();
     SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
@@ -153,7 +158,8 @@ public class SwerveModule extends SubsystemBase {
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
     //SwerveModuleState state = desiredState;  // don't optimize
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
+    // SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
+    SwerveModuleState state = desiredState;
 
     double velocity=getVelocity();
     // Calculate the drive output from the drive PID controller.
@@ -162,15 +168,26 @@ public class SwerveModule extends SubsystemBase {
 
     double turn_angle=getRotation2d().getRadians();
 
+    // if (turn_angle > 0) { // -180 to 180
+    //   turn_angle = Math.abs(turn_angle%(2.0 * Math.PI)) - Math.PI;
+    // } else {
+    //   turn_angle = (2.0*Math.PI) - Math.abs(turn_angle%(2.0 * Math.PI)) - Math.PI;
+    // }
+    //double avAngle = m_averager.getAve(turn_angle);
+    //System.out.println(turn_angle);
+
     // Calculate the turning motor output from the turning PID controller.
     double turnOutput = -m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     double set_drive=driveOutput+driveFeedforward;
-    double set_turn=turnOutput+turnFeedforward;;
+    double set_turn=turnOutput+turnFeedforward;
+
+    //System.out.println(set_drive);
+    //System.out.println(set_turn);
 
     driveForward(set_drive);
-    m_turningMotor.setVoltage(set_turn);
+    m_turningMotor.set(set_turn);
     
     if(debug){
       String s = String.format("Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 
@@ -195,7 +212,7 @@ public class SwerveModule extends SubsystemBase {
 
   public void setInverted(){
     m_inverted = true;
-    //m_driveMotor.setInverted(true);
+    m_driveMotor.setInverted(true);
   }
   
   public void driveForward(double dist) {

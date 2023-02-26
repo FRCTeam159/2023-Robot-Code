@@ -44,6 +44,8 @@ public class RobotContainer {
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
   private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller);
   private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
+  private final DriveToTarget m_DriveToTarget = new DriveToTarget(m_Drivetrain);
+
   
 
   //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
@@ -57,6 +59,8 @@ public class RobotContainer {
   public void robotInit() {
    // m_apriltag.start();
    m_Limelight.start();
+   m_DriveToTarget.start();
+
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -73,6 +77,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new DriveToTarget(m_Drivetrain);
+    return null;
   }
 }

@@ -20,6 +20,8 @@ public final class Main {
    * <p>If you change your main robot class, change the parameter type.
    */
   public static void main(String... args) {
+    //System.err.println("ERROR, BROSKI");
+    //System.exit(-1);
     RobotBase.startRobot(Robot::new);
   }
 }

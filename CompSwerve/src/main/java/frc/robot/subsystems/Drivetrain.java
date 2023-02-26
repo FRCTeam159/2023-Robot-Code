@@ -81,7 +81,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   static int count = 0;
-  private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
+  public final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
