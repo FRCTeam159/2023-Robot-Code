@@ -19,7 +19,7 @@ public final class Constants {
     static public final double kTurnGearRatio=30; // MK4i turn (all)
   
     public static final double kWheelRadius = 4;
-    public static final int kEncoderResolution = 4096;
+    public static final int kEncoderResolution = 42;
     public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
     public static final double kRadiansPerRot = Math.PI * 2/kTurnGearRatio;
 
@@ -51,10 +51,10 @@ public final class Constants {
     public static final int kFr_Drive = 7;
     public static final int kFr_Turn = 6;
 
-    public static final int kBr_Drive = 2;
+    public static final int kBr_Drive = 5;
     public static final int kBr_Turn = 1;
 
-    public static final int kBl_Drive = 5;
+    public static final int kBl_Drive = 2;
     public static final int kBl_Turn = 4;   
 
     public static final int kSpareSpark = 9;    

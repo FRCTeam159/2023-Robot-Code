@@ -25,7 +25,7 @@ import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
-import frc.robot.subsystems.Averager;
+//import frc.robot.subsystems.Averager;
 
 import static frc.robot.Constants.*;
 
@@ -47,7 +47,7 @@ public class SwerveModule extends SubsystemBase {
   private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
 
   private final PIDController m_turningPIDController = new PIDController(
-      .04,
+      0.1,
       0,
       0
       // new TrapezoidProfile.Constraints(
@@ -60,7 +60,7 @@ public class SwerveModule extends SubsystemBase {
   private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
 
   private int m_motorChannel;
-  Averager m_averager = new Averager(5);
+  //Averager m_averager = new Averager(5);
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder
@@ -80,7 +80,7 @@ public class SwerveModule extends SubsystemBase {
 
     m_id = id;
 
-    SmartDashboard.putString("mod" + m_motorChannel, "");
+    //SmartDashboard.putString("mod" + m_motorChannel, "");
     m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
 
@@ -109,8 +109,8 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void reset(){
-    m_averager.reset();
-    SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
+    //m_averager.reset();
+    //SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
     cnt=0;
@@ -158,8 +158,8 @@ public class SwerveModule extends SubsystemBase {
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
     //SwerveModuleState state = desiredState;  // don't optimize
-    // SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
-    SwerveModuleState state = desiredState;
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
+    //SwerveModuleState state = desiredState;
 
     double velocity=getVelocity();
     // Calculate the drive output from the drive PID controller.
@@ -177,7 +177,7 @@ public class SwerveModule extends SubsystemBase {
     //System.out.println(turn_angle);
 
     // Calculate the turning motor output from the turning PID controller.
-    double turnOutput = -m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
+    double turnOutput = m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     double set_drive=driveOutput+driveFeedforward;
@@ -190,7 +190,7 @@ public class SwerveModule extends SubsystemBase {
     m_turningMotor.set(set_turn);
     
     if(debug){
-      String s = String.format("Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.1f vs %-3.1f -> %-1.2f\n", 
+      String s = String.format("Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.3f vs %-3.3f -> %-1.3f\n", 
       velocity,state.speedMetersPerSecond,set_drive,Math.toDegrees(turn_angle), state.angle.getDegrees(), set_turn); 
       SmartDashboard.putString(name, s);
       // if((cnt%10)==0){

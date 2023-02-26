@@ -36,6 +36,7 @@ public class DriveToTarget extends Thread {
     while (!Thread.interrupted()) {
       try {
         execute();
+        Thread.sleep(20);
       } catch (Exception e) {
         System.out.println(e);
       }
@@ -62,15 +63,14 @@ public class DriveToTarget extends Thread {
         default:
       case looking:
         count++;
-        Limelight.setMode(Limelight.Cone);
-        if (count == 10) {
+        if (count == 60) {
         Limelight.setMode(Limelight.Box);
-        } else if (count == 20) {
-          Limelight.setMode(Limelight.Cone);
-
+        } else if (count >= 120) {
           count = 0;
+          Limelight.setMode(Limelight.Cone);
+          
         }
-        if (Limelight.haveTarget) {
+        if (Limelight.tx != 0 && Limelight.tx != -1) {
           System.out.println("Target found, attempting pickup");
           currentMode = targetFound;
           

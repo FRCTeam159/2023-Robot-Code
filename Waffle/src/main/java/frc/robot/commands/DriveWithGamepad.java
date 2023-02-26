@@ -85,7 +85,7 @@ public class DriveWithGamepad extends CommandBase {
       DriveToTarget.setMode(DriveToTarget.looking);
       
       } else {
-        //DriveToTarget.setMode(3);
+        
       }
     } else if (m_controller.getBButtonPressed()) {
 

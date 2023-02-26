@@ -22,8 +22,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 
 import static frc.robot.Constants.*;
+
+import com.kauailabs.navx.frc.AHRS;
 
 public class Drivetrain extends SubsystemBase {
   public static double dely = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
@@ -47,7 +51,8 @@ public class Drivetrain extends SubsystemBase {
 
   static int count = 0;
   //private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
-  private AnalogGyro m_gyro = new AnalogGyro(0);
+  // private AHRS m_gyro = new AHRS(I2C.Port.kOnboard);
+  private AHRS m_gyro = new AHRS();
 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
@@ -59,12 +64,13 @@ public class Drivetrain extends SubsystemBase {
 
     // m_frontLeft.setOffset(kFrontLeftOffset);
     // m_frontRight.setOffset(kFrontRightOffset);
-    // m_backLeft.setOffset(kBackLeftOffset);
+    
     // m_backRight.setOffset(kBackRightOffset);
-    // m_frontRight.setInverted();
-    // m_backRight.setInverted();
+    //m_frontRight.setInverted();
+    //m_backRight.setInverted();
+  m_backLeft.setInverted();
+    //m_backRight.setInverted();
     m_frontLeft.setInverted();
-    m_backLeft.setInverted();
 
     resetOdometry();
   }
@@ -135,6 +141,7 @@ public class Drivetrain extends SubsystemBase {
 
   public void log() {
     SmartDashboard.putNumber("heading", m_gyro.getAngle());
+    SmartDashboard.putBoolean("is gyro connected", m_gyro.isConnected());
     // m_frontLeft.log();
     // m_frontRight.log();
     // m_backLeft.log();
