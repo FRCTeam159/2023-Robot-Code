@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import java.security.KeyStore;
 import java.util.concurrent.RunnableFuture;
 
 import edu.wpi.first.math.spline.PoseWithCurvature;
@@ -14,6 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Claw;
+import static frc.robot.Constants.*;
+
 
 public class PoseArm extends CommandBase {
   public Arm m_Arm;
@@ -21,6 +24,7 @@ public class PoseArm extends CommandBase {
   public Claw m_Claw;
   public m mode = m.none;
   double joy;
+  double testArmAngle;
   public enum m{
     pickup,
     hold,
@@ -31,12 +35,14 @@ public class PoseArm extends CommandBase {
   };
   public Timer tim = new Timer();
   public double k = 0; //set to 113;
+  public boolean lastStageOneForwardLimitState = true;
   /** Creates a new PoseArm. */
   public PoseArm(Arm arm, XboxController controller, Claw claw) {
     m_Arm = arm;
     m_Controller = controller;
     m_Claw = claw;
     joy = 0;
+    testArmAngle = 0;
     //addRequirements(arm, claw);
     //SmartDashboard.putNumber("joystick", -2);
   }
@@ -44,6 +50,7 @@ public class PoseArm extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    testArmAngle = m_Arm.getStageOneAngle();
     //m_Arm.posHolding();
     tim.start();
   }
@@ -53,11 +60,19 @@ public class PoseArm extends CommandBase {
   public void execute() {
     double up = m_Controller.getRightTriggerAxis();
     double down = m_Controller.getLeftTriggerAxis();
-    if((m_Arm.encoderOne.getPosition()-k)<0){
-      m_Arm.stageOne.set(up - down);
-    } else if((m_Arm.encoderOne.getPosition()-k)>0){
-      m_Arm.stageOne.set(up);
+    //m_Arm.stageOne.set(up - down);
+
+    if(m_Controller.getLeftTriggerAxis() > 0.5 ){
+      testArmAngle = testArmAngle + 0.003;
     }
+    if(m_Controller.getRightTriggerAxis() > 0.5 ){
+      testArmAngle = testArmAngle - 0.003;
+    }
+    //System.out.println(pov);
+    System.out.println(String.format("Current position: %-1.2f, current setpoint: %1.2f", m_Arm.getStageOneAngle(), testArmAngle));
+    m_Arm.armPIDtest(testArmAngle);
+
+   //m_Arm.armveloPID(up - down);
 
     if(m_Controller.getLeftBumper() && joy < 1){
       joy= joy + 0.01;
@@ -79,6 +94,15 @@ public class PoseArm extends CommandBase {
     // int direction = m_Controller.getPOV(1);
     // m_Arm.posTrim(Units.degreesToRadians(direction));
     // m_Arm.runFeed();
+
+    // Check if we've hit the forward limit
+    if(m_Arm.stageOneForwardLimit.isPressed() && lastStageOneForwardLimitState == false)
+    {
+      m_Arm.setStageOneZero();
+      testArmAngle = kStageOneForwardLimitOffset;
+
+    }
+    lastStageOneForwardLimitState = m_Arm.stageOneForwardLimit.isPressed();
   }
 
   public void wristTest() {
