@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxLimitSwitch;
 
 public class Arm extends Thread{
   public CANSparkMax stageOne;
@@ -24,8 +25,9 @@ public class Arm extends Thread{
   public RelativeEncoder encoderTwo;
   public CANSparkMax wrist;
   public RelativeEncoder encoderWrist;
+  public SparkMaxLimitSwitch stageOneForwardLimit;
   //TODO tune PID
-  public PIDController onePID = new PIDController(1, 0, 0);
+  public PIDController onePID = new PIDController(5, 0, 0);
   public PIDController twoPID = new PIDController(1, 0, 0);
   public PIDController wristPID = new PIDController(0.8, 0, 0);
 
@@ -37,6 +39,7 @@ public class Arm extends Thread{
   public Arm() {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderOne = stageOne.getEncoder();
+    encoderOne.setPositionConversionFactor(1/465.23);
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderTwo = stageTwo.getEncoder();
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -46,11 +49,27 @@ public class Arm extends Thread{
     wristPID.setTolerance(1);
     SmartDashboard.putNumber("armboi", -10000);
     SmartDashboard.putNumber("wristy", 0);
+    encoderOne.setPosition(0);
+    stageOneForwardLimit = stageOne.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   }
+
+  public double getStageOneAngle() {
+    // return the absolute (robot-relative) angle of the first stage
+    return encoderOne.getPosition();
+  }
+
+  public void setStageOneZero() {
+    // Called when the forward limit switch is pressed
+    // Sets the angular reference for the first stage
+    if (stageOneForwardLimit.isPressed()) {
+      encoderOne.setPosition(kStageOneForwardLimitOffset);
+      System.out.println("Setting stage one forward reference.");
+    }
+  }  
 
   public void setAngle(double x, double y) {
     ArmPosition target =  new ArmPosition(x, y, ArmPosition.consType.pose);
-    double oneOut = onePID.calculate(encoderOne.getPosition(), target.oneAngle/(2*Math.PI));
+    double oneOut = onePID.calculate(getStageOneAngle(), target.oneAngle/(2*Math.PI));
     double twoOut = twoPID.calculate(encoderTwo.getPosition(), target.twoAngle/(2*Math.PI));
     double wristOut = wristPID.calculate(encoderWrist.getPosition(), target.wristAngle);
     stageOne.setVoltage(oneOut);
@@ -96,6 +115,17 @@ public class Arm extends Thread{
     //System.out.println("pos " + encoderWrist.getPosition()/63 + "setpt" + setpoint + "output" + output);
   }
 
+  public void armPIDtest(double setpoint){
+    double output = onePID.calculate(getStageOneAngle(), setpoint);
+    stageOne.set(output);
+  }
+
+  public void armveloPID(double setpoint){
+    double output = wristPID.calculate(encoderOne.getVelocity()/612, setpoint*3.75); //setpoint*3.75
+    stageOne.set(output);
+    System.out.println("vel " + encoderWrist.getVelocity()/612 + "err " + wristPID.getVelocityError() + "output" + output);
+  }
+
   //various position codes
 
   // holding position
@@ -105,13 +135,13 @@ public class Arm extends Thread{
   }
 
   public void posTrim(double r){
-    ArmPosition pos = new ArmPosition(encoderOne.getPosition(), encoderTwo.getPosition(), encoderWrist.getPosition());
+    ArmPosition pos = new ArmPosition(getStageOneAngle(), encoderTwo.getPosition(), encoderWrist.getPosition());
     System.out.println("trimming");
     targetFeeder.add(new ArmPosition(pos.xPos + Math.cos(r), pos.yPos + Math.sin(r), ArmPosition.consType.pose));
   }
 
   public void log() {
-    SmartDashboard.putNumber("armboi", encoderOne.getPosition());
+    SmartDashboard.putNumber("armboi", getStageOneAngle());
     SmartDashboard.putNumber("wristy", encoderWrist.getPosition());
   }
 

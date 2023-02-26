@@ -36,6 +36,7 @@ public class Claw extends SubsystemBase {
     m_clawMotor1 = new CANSparkMax(kClawMotorID1, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_clawMotor2 = new CANSparkMax(kClawMotorID2, CANSparkMaxLowLevel.MotorType.kBrushless); // can't measure
     m_clawMotor1.setInverted(true);
+    m_clawMotor2.setInverted(false);
     m_encoderLeft = m_clawMotor1.getEncoder();
     m_encoderRight = m_clawMotor2.getEncoder();
   }
@@ -77,6 +78,6 @@ public class Claw extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //log();
+    log();
   }
 }
