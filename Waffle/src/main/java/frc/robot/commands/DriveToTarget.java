@@ -15,12 +15,12 @@ public class DriveToTarget extends Thread {
   public static final int placement = 3;
   private int count = 0;
   /** Creates a new DriveToTarget. */
-  PIDController turnController = new PIDController(.1,0,0);
-  PIDController areaController = new PIDController(.1,0,0);
+  PIDController turnController = new PIDController(.5,0,0);
+  PIDController areaController = new PIDController(.5,0,0);
 
   Timer m_timer = new Timer();
 
-  private static int currentMode = 0;
+  static int currentMode = 0;
 
   Drivetrain m_drive;
   public DriveToTarget(Drivetrain drive) {
