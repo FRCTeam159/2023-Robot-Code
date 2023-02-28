@@ -69,8 +69,8 @@ public class PoseArm extends CommandBase {
       testArmAngle = testArmAngle - 0.003;
     }
     //System.out.println(pov);
-    System.out.println(String.format("Current position: %-1.2f, current setpoint: %1.2f", m_Arm.getStageOneAngle(), testArmAngle));
-    m_Arm.armPIDtest(testArmAngle);
+    //System.out.println(String.format("Current position: %-1.2f, current setpoint: %1.2f", m_Arm.getStageOneAngle(), testArmAngle));
+    //m_Arm.armPIDtest(testArmAngle);
 
    //m_Arm.armveloPID(up - down);
 
@@ -81,28 +81,27 @@ public class PoseArm extends CommandBase {
       joy= joy - 0.01;
     }
     //m_Arm.wrist.set(joy/2);
-    m_Arm.wristPIDtest(joy);
+    //m_Arm.wristPIDtest(joy);
     //System.out.println("joy: " + joy);
 
     m_Arm.log(); 
     wristTest();
-
+    if(m_Controller.getYButtonPressed()){
+      m_Arm.posSetpoint1();
+      //System.out.println("y pressed");
+    }
     
-    //m_Arm.stageOne.set((up-down)*0.001);
-    //System.out.println(up-down);
-    //SmartDashboard.putNumber("joystick", m_Controller.getRightY());
-    // int direction = m_Controller.getPOV(1);
+    //int direction = m_Controller.getPOV(1);
     // m_Arm.posTrim(Units.degreesToRadians(direction));
-    // m_Arm.runFeed();
 
     // Check if we've hit the forward limit
-    if(m_Arm.stageOneForwardLimit.isPressed() && lastStageOneForwardLimitState == false)
-    {
-      m_Arm.setStageOneZero();
-      testArmAngle = kStageOneForwardLimitOffset;
+    // if(m_Arm.stageOneForwardLimit.isPressed() && lastStageOneForwardLimitState == false)
+    // {
+    //   m_Arm.setStageOneZero();
+    //   testArmAngle = kStageOneForwardLimitOffset;
 
-    }
-    lastStageOneForwardLimitState = m_Arm.stageOneForwardLimit.isPressed();
+    // }
+    // lastStageOneForwardLimitState = m_Arm.stageOneForwardLimit.isPressed();
   }
 
   public void wristTest() {

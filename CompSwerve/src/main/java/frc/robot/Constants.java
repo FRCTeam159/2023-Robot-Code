@@ -47,6 +47,8 @@ public final class Constants {
 
     public static final double kStageOneLength = Units.inchesToMeters(43.18);
     public static final double kStageTwoLength = Units.inchesToMeters(30.59);
+    public static final double kMinRadius = Math.abs(kStageOneLength-kStageTwoLength);
+    public static final double kMaxRadius = kStageOneLength + kStageTwoLength;
     public static final double kStageOneForwardLimitOffset = 0.0143; // Unit is rotations
 
 
