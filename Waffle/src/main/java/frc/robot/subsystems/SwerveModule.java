@@ -44,10 +44,10 @@ public class SwerveModule extends SubsystemBase {
   boolean m_inverted = false;
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.3, 0, 0);
 
   private final PIDController m_turningPIDController = new PIDController(
-      0.1,
+      0.3,
       0,
       0
       // new TrapezoidProfile.Constraints(
@@ -210,9 +210,9 @@ public class SwerveModule extends SubsystemBase {
   //   m_turningEncoder.configMagnetOffset(offset,20);
   // }
 
-  public void setInverted(){
+  public void setDriveInverted(){
     m_inverted = true;
-    m_driveMotor.setInverted(true);
+    //m_driveMotor.setInverted(true);
   }
   
   public void driveForward(double dist) {
@@ -220,7 +220,6 @@ public class SwerveModule extends SubsystemBase {
     m_driveMotor.setVoltage(dist);
   }
   public void turnAround(double dist) {
-    dist = m_inverted? -dist: dist;
     m_turningMotor.setVoltage(dist);
   }
   /**

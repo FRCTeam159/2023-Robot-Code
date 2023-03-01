@@ -32,8 +32,8 @@ public final class Constants {
     // public static final double kBackLeftOffset = 138.2;
     // public static final double kBackRightOffset = 64.3;
 
-    public static final double kFrontWheelBase = 19; // distance bewteen front wheels
-	public static final double kSideWheelBase = 15;  // distance beteen side wheels
+    public static final double kFrontWheelBase = 15; // distance bewteen front wheels
+	public static final double kSideWheelBase = 19;  // distance beteen side wheels
 
     public static final int kImageWidth = 640;
     public static final int kImageHeight = 480;

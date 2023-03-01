@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.sensors.BNO055;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,10 +21,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.SerialPort;
+
 
 import static frc.robot.Constants.*;
 
@@ -35,10 +39,10 @@ public class Drivetrain extends SubsystemBase {
   public static double kMaxAcceleration = 1.0;
   public static double kMaxVelocity = 1.0;
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
-  private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
-  private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
-  private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
+  private final Translation2d m_frontLeftLocation = new Translation2d(-delx, -dely);
+  private final Translation2d m_frontRightLocation = new Translation2d(-delx, dely);
+  private final Translation2d m_backLeftLocation = new Translation2d(delx, -dely);
+  private final Translation2d m_backRightLocation = new Translation2d(delx, dely);
 
   public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
 
@@ -52,7 +56,12 @@ public class Drivetrain extends SubsystemBase {
   static int count = 0;
   //private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
   // private AHRS m_gyro = new AHRS(I2C.Port.kOnboard);
-  private AHRS m_gyro = new AHRS();
+  //private AHRS m_gyro = new AHRS();
+  ADXRS450_Gyro m_gyro = new ADXRS450_Gyro();
+  AHRS m_navx  = new AHRS(); // kUSB1 - outside type 
+  private int[] bnoOffsets = {0, -42, -8, -24, -3, 0, 2, 299, -59, -25, 523};
+  BNO055 m_BNOs;
+
 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
@@ -60,17 +69,19 @@ public class Drivetrain extends SubsystemBase {
 
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
+    m_BNOs = BNO055.getInstance(
+      BNO055.opmode_t.OPERATION_MODE_IMUPLUS,
+      BNO055.vector_type_t.VECTOR_EULER,
+      I2C.Port.kMXP,
+      BNO055.BNO055_ADDRESS_A,
+      bnoOffsets
+      );
+    m_BNOs.reset();
+    m_navx.reset();
     m_gyro.reset();
 
-    // m_frontLeft.setOffset(kFrontLeftOffset);
-    // m_frontRight.setOffset(kFrontRightOffset);
-    
-    // m_backRight.setOffset(kBackRightOffset);
-    //m_frontRight.setInverted();
-    //m_backRight.setInverted();
-  m_backLeft.setInverted();
-    //m_backRight.setInverted();
-    m_frontLeft.setInverted();
+    m_frontLeft.setDriveInverted();
+    m_backLeft.setDriveInverted();
 
     resetOdometry();
   }
@@ -113,7 +124,11 @@ public class Drivetrain extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // turn confidence stds
 
   public Rotation2d getGyroAngle() {
-    return m_gyro.getRotation2d();
+    if (m_gyro != null) {
+      return m_gyro.getRotation2d().unaryMinus();
+    } else {
+      return new Rotation2d();
+    }
   }
 
   /**
@@ -128,7 +143,7 @@ public class Drivetrain extends SubsystemBase {
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     var swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, /*getGyroAngle()*/new Rotation2d())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getGyroAngle())
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
@@ -136,12 +151,13 @@ public class Drivetrain extends SubsystemBase {
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
     updateOdometry();
-    // log();
+    log();
   }
 
   public void log() {
-    SmartDashboard.putNumber("heading", m_gyro.getAngle());
-    SmartDashboard.putBoolean("is gyro connected", m_gyro.isConnected());
+    SmartDashboard.putNumber("BNO055 heading: ", m_BNOs.getRotation2d().getDegrees());
+    SmartDashboard.putNumber("NAVX heading: ", m_navx.getRotation2d().getDegrees());
+    SmartDashboard.putNumber("ADXR heading: ", m_gyro.getRotation2d().getDegrees());
     // m_frontLeft.log();
     // m_frontRight.log();
     // m_backLeft.log();

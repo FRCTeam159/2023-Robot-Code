@@ -47,6 +47,7 @@ public class DrivePath extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    //m_drive.reset();
     System.out.println("DRIVEPATH_INIT");
     
     maxV=Drivetrain.kMaxVelocity;
@@ -64,7 +65,7 @@ public class DrivePath extends CommandBase {
     intervals = (int) (runtime / 0.02);
     Pose2d p = m_trajectory.getInitialPose();
     System.out.format("runtime:%-3.1f number states:%d intervals:%d\n",runtime,states,intervals); 
-    m_drive.resetOdometry();
+   // m_drive.resetOdometry();
 
     //System.out.println(p);
 
@@ -99,6 +100,8 @@ public class DrivePath extends CommandBase {
         State state=states.get(i);
         Pose2d psi=state.poseMeters.relativeTo(p0);
         state.poseMeters=psi;
+        System.out.println(state.poseMeters);
+
       }
       return trajectory;
     } catch (Exception ex) {
@@ -112,18 +115,17 @@ public class DrivePath extends CommandBase {
   // =================================================
   @Override
   public void execute() {
-    //elapsed = m_timer.get();
+    elapsed = m_timer.get();
     if(m_trajectory==null){
       System.out.print("ERROR DrivePath.execute - trajectory is null");
        return;
     }
-    // elapsed = m_drive.getTime();
+    //elapsed = m_drive.getTime();
   
     Trajectory.State reference = m_trajectory.sample(elapsed);
 
     ChassisSpeeds speeds = m_ppcontroller.calculate(m_drive.getPose(), (PathPlannerState) reference);
       m_drive.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
-  
 
   }
 
