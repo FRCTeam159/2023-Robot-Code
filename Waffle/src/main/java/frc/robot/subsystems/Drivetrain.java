@@ -10,9 +10,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.sensors.BNO055;
+import frc.robot.sensors.DriveGyro;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,18 +19,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.SerialPort;
-
-
 import static frc.robot.Constants.*;
-
-import com.kauailabs.navx.frc.AHRS;
 
 public class Drivetrain extends SubsystemBase {
   public static double dely = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
@@ -54,33 +43,18 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d m_Field2d = new Field2d();
 
   static int count = 0;
-  //private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
-  // private AHRS m_gyro = new AHRS(I2C.Port.kOnboard);
-  //private AHRS m_gyro = new AHRS();
-  ADXRS450_Gyro m_gyro = new ADXRS450_Gyro();
-  AHRS m_navx  = new AHRS(); // kUSB1 - outside type 
-  private int[] bnoOffsets = {0, -42, -8, -24, -3, 0, 2, 299, -59, -25, 523};
-  BNO055 m_BNOs;
-
-
+  DriveGyro m_gyro = new DriveGyro(DriveGyro.gyros.BNO55);
+ 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
       new SwerveModulePosition(), new SwerveModulePosition() };
 
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
-    m_BNOs = BNO055.getInstance(
-      BNO055.opmode_t.OPERATION_MODE_IMUPLUS,
-      BNO055.vector_type_t.VECTOR_EULER,
-      I2C.Port.kMXP,
-      BNO055.BNO055_ADDRESS_A,
-      bnoOffsets
-      );
-    m_BNOs.reset();
-    m_navx.reset();
+
     m_gyro.reset();
 
-    m_frontLeft.setDriveInverted();
+    //m_frontLeft.setDriveInverted();
     m_backLeft.setDriveInverted();
 
     resetOdometry();
@@ -124,11 +98,7 @@ public class Drivetrain extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // turn confidence stds
 
   public Rotation2d getGyroAngle() {
-    if (m_gyro != null) {
-      return m_gyro.getRotation2d().unaryMinus();
-    } else {
-      return new Rotation2d();
-    }
+    return m_gyro.getRotation2d();
   }
 
   /**
@@ -151,18 +121,14 @@ public class Drivetrain extends SubsystemBase {
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
     updateOdometry();
-    log();
+    //log();
   }
 
   public void log() {
-    SmartDashboard.putNumber("BNO055 heading: ", m_BNOs.getRotation2d().getDegrees());
-    SmartDashboard.putNumber("NAVX heading: ", m_navx.getRotation2d().getDegrees());
-    SmartDashboard.putNumber("ADXR heading: ", m_gyro.getRotation2d().getDegrees());
-    // m_frontLeft.log();
-    // m_frontRight.log();
-    // m_backLeft.log();
-    // m_backRight.log();
-    
+    //String s=String.format("%s: %-3.1f",m_gyro.toString(),m_gyro.getRotation2d().getDegrees() );
+    //SmartDashboard.putString("heading", s);
+    SmartDashboard.putNumber("gyro", m_gyro.getAngle());
+     
   }
 
   /** Updates the field relative position of the robot. */
@@ -208,6 +174,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
   }
 
 public Command exampleMethodCommand() {

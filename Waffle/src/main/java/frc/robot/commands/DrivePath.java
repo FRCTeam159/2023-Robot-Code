@@ -80,13 +80,12 @@ public class DrivePath extends CommandBase {
 
 
   Trajectory getTrajectory() {
-
       return pathPlannerTest();
   }
 
   Trajectory pathPlannerTest() {
     try {
-      PathPlannerTrajectory trajectory = PathPlanner.loadPath("Example path", 
+      PathPlannerTrajectory trajectory = PathPlanner.loadPath("Test", 
         new PathConstraints(Drivetrain.kMaxVelocity,Drivetrain.kMaxAcceleration)); // max vel & accel
     
       Pose2d p0 = trajectory.getInitialPose();
@@ -101,7 +100,6 @@ public class DrivePath extends CommandBase {
         Pose2d psi=state.poseMeters.relativeTo(p0);
         state.poseMeters=psi;
         System.out.println(state.poseMeters);
-
       }
       return trajectory;
     } catch (Exception ex) {

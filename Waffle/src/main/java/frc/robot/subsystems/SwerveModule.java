@@ -4,24 +4,15 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.RelativeEncoder;
@@ -168,14 +159,6 @@ public class SwerveModule extends SubsystemBase {
 
     double turn_angle=getRotation2d().getRadians();
 
-    // if (turn_angle > 0) { // -180 to 180
-    //   turn_angle = Math.abs(turn_angle%(2.0 * Math.PI)) - Math.PI;
-    // } else {
-    //   turn_angle = (2.0*Math.PI) - Math.abs(turn_angle%(2.0 * Math.PI)) - Math.PI;
-    // }
-    //double avAngle = m_averager.getAve(turn_angle);
-    //System.out.println(turn_angle);
-
     // Calculate the turning motor output from the turning PID controller.
     double turnOutput = m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
@@ -190,7 +173,7 @@ public class SwerveModule extends SubsystemBase {
     m_turningMotor.set(set_turn);
     
     if(debug){
-      String s = String.format("Vel %-1.2f vs %-1.2f -> %-1.2f Angle %-3.3f vs %-3.3f -> %-1.3f\n", 
+      String s = String.format("Vel %-2.2f(%-2.2f) -> %-2.2f Angle %-3.3f(%-2.3f) -> %-2.3f\n", 
       velocity,state.speedMetersPerSecond,set_drive,Math.toDegrees(turn_angle), state.angle.getDegrees(), set_turn); 
       SmartDashboard.putString(name, s);
       // if((cnt%10)==0){
@@ -212,11 +195,11 @@ public class SwerveModule extends SubsystemBase {
 
   public void setDriveInverted(){
     m_inverted = true;
-    //m_driveMotor.setInverted(true);
+    m_driveMotor.setInverted(true);
   }
   
   public void driveForward(double dist) {
-    dist = m_inverted? -dist: dist;
+   // dist = m_inverted? -dist: dist;
     m_driveMotor.setVoltage(dist);
   }
   public void turnAround(double dist) {
