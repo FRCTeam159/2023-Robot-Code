@@ -28,33 +28,41 @@ public class Arm extends Thread{
   public SparkMaxLimitSwitch stageOneForwardLimit;
   //TODO tune PID
   public PIDController onePID = new PIDController(5, 0, 0);
-  public PIDController twoPID = new PIDController(1, 0, 0);
+  public PIDController twoPID = new PIDController(2, 0, 0);
   public PIDController wristPID = new PIDController(0.8, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
-  XboxController m_Controller;
 
   /** Creates a new Arm. 
    @param m_Limelight **/
   public Arm() {
     stageOne = new CANSparkMax(kStageOneChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderOne = stageOne.getEncoder();
-    encoderOne.setPositionConversionFactor(1/465.23);
+    encoderOne.setPositionConversionFactor(kEncoderOnePosConversionFactor);
     stageTwo = new CANSparkMax(kStageTwoChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderTwo = stageTwo.getEncoder();
+    encoderTwo.setPositionConversionFactor(kEncoderTwoPosConversionFactor);
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderWrist = wrist.getEncoder();
     onePID.setTolerance(0.1);
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
     SmartDashboard.putString("simulationtest", "default");
+    SmartDashboard.putString("encoders", "default");
     encoderOne.setPosition(0);
+    encoderTwo.setPosition(0);
     stageOneForwardLimit = stageOne.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   }
 
   public double getStageOneAngle() {
     // return the absolute (robot-relative) angle of the first stage
     return encoderOne.getPosition();
+  }
+
+  public double getStageTwoAngle() {
+    // return the absolute (robot-relative) angle of the first stage
+    //System.out.println(encoderTwo.getPositionConversionFactor());
+    return encoderTwo.getPosition();
   }
 
   public void setStageOneZero() {
@@ -67,12 +75,13 @@ public class Arm extends Thread{
   }  
 
   public void setAngle(ArmPosition pos) {
-    double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
-    double twoOut = twoPID.calculate(encoderTwo.getPosition(), pos.twoAngle/(2*Math.PI));
+    double oneOut = onePID.calculate(getStageOneAngle(), -pos.oneAngle/(2*Math.PI));
+    double twoOut = twoPID.calculate(getStageTwoAngle(), -pos.twoAngle/(2*Math.PI));
     double wristOut = wristPID.calculate(encoderWrist.getPosition(), pos.wristAngle);
     stageOne.setVoltage(oneOut);
     stageTwo.setVoltage(twoOut);
     wrist.setVoltage(wristOut);
+    //System.out.println(oneOut);
   }
 
   public boolean armAtSetPoint(){
@@ -97,7 +106,12 @@ public class Arm extends Thread{
 
   public void armPIDtest(double setpoint){
     double output = onePID.calculate(getStageOneAngle(), setpoint);
-    stageOne.set(output);
+    //stageOne.set(output);
+  }
+
+  public void armPIDtesttwo(double setpoint){
+    double output = twoPID.calculate(getStageOneAngle(), setpoint);
+    //stageTwo.set(output);
   }
 
   public void armveloPID(double setpoint){
@@ -111,16 +125,12 @@ public class Arm extends Thread{
   // holding position
   public void posHolding(){
     targetFeeder.clear();
-    targetFeeder.ensureCapacity(10);
     targetFeeder.add(new ArmPosition(0.4, 0.4, ArmPosition.consType.pose));
     System.out.println("pos is holding");
   }
 
-  
-
   public void posSetpoint1(){
     targetFeeder.clear();
-    targetFeeder.ensureCapacity(10);
     targetFeeder.add(new ArmPosition(0.5, 0.5, ArmPosition.consType.pose));
   }
 
@@ -131,9 +141,13 @@ public class Arm extends Thread{
     targetFeeder.set(0, new ArmPosition(pos.xPos + Math.cos(r), pos.yPos + Math.sin(r), ArmPosition.consType.pose));
   }
 
+  //pos code end
+
   public void log() {
-    String s = targetFeeder.size() > 0?String.format("alpha: %-3.2f beta: %-3.2f", targetFeeder.get(0).oneAngle, targetFeeder.get(0).twoAngle): "no things";
+    String s = targetFeeder.size() > 0?String.format("alpha: %-3.2f beta: %-3.2f", targetFeeder.get(0).oneAngle/(2*Math.PI), targetFeeder.get(0).twoAngle/(2*Math.PI)): "no things";
     SmartDashboard.putString("simulationtest", s);
+    String t = String.format("encoder one: %-3.2f encoder two: %-3.2f", getStageOneAngle(), getStageTwoAngle());
+    SmartDashboard.putString("encoders", t);
   }
 
   public void run(){

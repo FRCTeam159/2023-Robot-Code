@@ -13,36 +13,30 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.BNO055;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Claw;
 import static frc.robot.Constants.*;
 
 
 public class PoseArm extends CommandBase {
+
   public Arm m_Arm;
   public XboxController m_Controller;
   public Claw m_Claw;
-  public m mode = m.none;
-  double joy;
-  double testArmAngle;
-  public enum m{
-    pickup,
-    hold,
-    drop,
-    eject,
-    smallEject,
-    none
-  };
-  public Timer tim = new Timer();
-  public double k = 0; //set to 113;
+  double armController2;
+  double armController1;
+
+  double stageOneOffset;
+  
   public boolean lastStageOneForwardLimitState = true;
   /** Creates a new PoseArm. */
   public PoseArm(Arm arm, XboxController controller, Claw claw) {
     m_Arm = arm;
     m_Controller = controller;
     m_Claw = claw;
-    joy = 0;
-    testArmAngle = 0;
+    armController2 = 0;
+    armController1 = 0;
     //addRequirements(arm, claw);
     //SmartDashboard.putNumber("joystick", -2);
   }
@@ -50,9 +44,8 @@ public class PoseArm extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    testArmAngle = m_Arm.getStageOneAngle();
-    //m_Arm.posHolding();
-    tim.start();
+    armController1 = m_Arm.getStageOneAngle();
+    m_Arm.posHolding();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -61,114 +54,46 @@ public class PoseArm extends CommandBase {
     double up = m_Controller.getRightTriggerAxis();
     double down = m_Controller.getLeftTriggerAxis();
     //m_Arm.stageOne.set(up - down);
+    //m_Arm.stageTwo.set(m_Controller.getLeftX());
+    //System.out.println(m_Controller.getLeftX());
 
-    if(m_Controller.getLeftTriggerAxis() > 0.5 ){
-      testArmAngle = testArmAngle + 0.003;
+    if(m_Controller.getPOV() == 0){
+      armController1 = armController1 + 0.01;
     }
-    if(m_Controller.getRightTriggerAxis() > 0.5 ){
-      testArmAngle = testArmAngle - 0.003;
+    if(m_Controller.getPOV() == 180){
+      armController1 = armController1 - 0.01;
     }
-    //System.out.println(pov);
-    //System.out.println(String.format("Current position: %-1.2f, current setpoint: %1.2f", m_Arm.getStageOneAngle(), testArmAngle));
-    //m_Arm.armPIDtest(testArmAngle);
 
-   //m_Arm.armveloPID(up - down);
-
-    if(m_Controller.getLeftBumper() && joy < 1){
-      joy= joy + 0.01;
+    if(m_Controller.getPOV() == 90){
+      armController2= armController2 + 0.01;
     }
-    if(m_Controller.getRightBumper() && joy > -1){
-      joy= joy - 0.01;
+    if(m_Controller.getPOV() == 270){
+      armController2= armController2 - 0.01;
     }
-    //m_Arm.wrist.set(joy/2);
-    //m_Arm.wristPIDtest(joy);
-    //System.out.println("joy: " + joy);
+    
+    m_Arm.armPIDtest(armController1);
+    m_Arm.armPIDtesttwo(armController2);
 
     m_Arm.log(); 
-    wristTest();
+    m_Claw.clawControl();
     if(m_Controller.getYButtonPressed()){
       m_Arm.posSetpoint1();
       //System.out.println("y pressed");
     }
+    if(m_Controller.getBButtonPressed()){
+      m_Arm.posHolding();
+      System.out.println("b pressed");
+    }
     
-    //int direction = m_Controller.getPOV(1);
-    // m_Arm.posTrim(Units.degreesToRadians(direction));
-
-    // Check if we've hit the forward limit
-    // if(m_Arm.stageOneForwardLimit.isPressed() && lastStageOneForwardLimitState == false)
-    // {
-    //   m_Arm.setStageOneZero();
-    //   testArmAngle = kStageOneForwardLimitOffset;
-
-    // }
-    // lastStageOneForwardLimitState = m_Arm.stageOneForwardLimit.isPressed();
   }
 
-  public void wristTest() {
-    if (m_Controller.getBButtonPressed()) {
-      System.out.print("B button");
-      if (mode == m.none || mode == m.eject){
-        m_Claw.clawSolenoidState(false);
-        mode = m.pickup;
-      }else if(mode == m.pickup){
-        m_Claw.clawSolenoidState(true);
-        mode = m.hold;
-      }else if (mode == m.hold){
-        m_Claw.clawSolenoidState(false);
-        mode = m.drop;
-        tim.reset();
-    }
-    }
 
-    if(m_Controller.getXButtonPressed()){
-      m_Claw.clawSolenoidState(true);
-      mode = m.eject;
-      tim.reset();
-    }
-
-    if(m_Controller.getAButtonPressed()){
-      m_Claw.clawSolenoidState(false);
-      mode = m.smallEject;
-      tim.reset();
-    }
-
-    switch(mode){
-      case none:
-        m_Claw.clawMotorState(0);
-        break;
-      case pickup:
-        m_Claw.clawMotorState(1);
-        break;
-      case hold:
-        m_Claw.clawMotorState(2);
-        break;
-      case drop:
-        m_Claw.clawMotorState(0);
-        break;
-      case eject:
-        m_Claw.clawMotorState(3);
-        break;
-      case smallEject:
-        m_Claw.clawMotorState(4);
-
-    }
-
-    if(mode == m.drop && tim.get() > 3){
-      mode = m.none;
-      m_Claw.clawSolenoidState(true);
-    }
-
-    if(mode == m.eject && tim.get() > 0.5){
-      mode = m.none;
-      m_Claw.clawSolenoidState(true);
-    }
-
-    if(mode == m.smallEject && tim.get() > 0.5){
-      mode = m.none;
-      m_Claw.clawSolenoidState(true);
-    }
-
+  public void setArmOffsets(BNO055 gyro){
+    double theta = Math.atan(gyro.getVector()[2]/gyro.getVector()[0]);
+    stageOneOffset = -theta/(2*Math.PI);
+    System.out.println("fancy thing: " + theta/(2*Math.PI));
   }
+  
 
   // Called once the command ends or is interrupted.
   @Override

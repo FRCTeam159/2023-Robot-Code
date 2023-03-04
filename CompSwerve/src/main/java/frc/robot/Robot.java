@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.BNO055.BNO055OffsetData;
+import frc.robot.BNO055.opmode_t;
+import edu.wpi.first.wpilibj.I2C;
 
 
 
@@ -24,6 +27,9 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
 
+  public BNO055 m_gyroShldr;
+  private BNO055OffsetData ShldrOffsets = new BNO055OffsetData(1, 34, -27, -24, 0, 1, -2, -101, 85, -121, 1066);
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -34,6 +40,14 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     m_robotContainer.robotInit();
+
+    m_gyroShldr = BNO055.getInstance(
+      BNO055.opmode_t.OPERATION_MODE_NDOF,
+      BNO055.vector_type_t.VECTOR_GRAVITY,
+      I2C.Port.kMXP,
+      BNO055.BNO055_ADDRESS_A,
+      ShldrOffsets,
+      "BNO055 shldr");
 
 
   }
@@ -52,11 +66,15 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    m_gyroShldr.log();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_gyroShldr.setMode(opmode_t.OPERATION_MODE_NDOF);
+    m_gyroShldr.reset();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -86,6 +104,8 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     m_robotContainer.teleopInit();
+    m_robotContainer.m_PoseArm.setArmOffsets(m_gyroShldr);
+    //BNO055OffsetData offsets = m_gyroShldr.readOffsets();
   }
 
   /** This function is called periodically during operator control. */

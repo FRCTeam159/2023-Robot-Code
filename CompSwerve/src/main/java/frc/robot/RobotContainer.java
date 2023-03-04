@@ -34,6 +34,7 @@ import frc.robot.subsystems.Autonomous;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final XboxController m_Controller = new XboxController(0);
+  private final XboxController m_OpController = new XboxController(1);
   //Subsystems
   private final Drivetrain m_Drivetrain = new Drivetrain();
   private final Autonomous m_auto = new Autonomous(m_Drivetrain);
@@ -42,11 +43,11 @@ public class RobotContainer {
   //private final TargetMgr m_TargetMgr = new TargetMgr();
   //public final Limelight m_Limelight = new Limelight();
   private final Arm m_Arm = new Arm();
-  private final Claw m_Claw = new Claw();
+  private final Claw m_Claw = new Claw(m_OpController);
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller, m_Claw);
+  final PoseArm m_PoseArm = new PoseArm(m_Arm, m_OpController, m_Claw);
   //private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
   
 
@@ -70,7 +71,8 @@ public class RobotContainer {
   }
 
   public void teleopInit(){
-    CommandScheduler.getInstance().schedule(new PoseArm(m_Arm, m_Controller, m_Claw));
+    // CommandScheduler.getInstance().schedule(new PoseArm(m_Arm, m_OpController, m_Claw));
+    CommandScheduler.getInstance().schedule(m_PoseArm);
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
