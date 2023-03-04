@@ -45,7 +45,7 @@ public class DriveWithGamepad extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveWithJoystick(false);
+    driveWithJoystick(true);
     testLimelight();
   }
 
@@ -62,7 +62,7 @@ public class DriveWithGamepad extends CommandBase {
   private void driveWithJoystick(boolean fieldRelative) {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    final var xSpeed = -m_xspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftY(), 0.2)) * kMaxSpeed;
+    final var xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftY(), 0.2)) * kMaxSpeed;
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
@@ -74,8 +74,9 @@ public class DriveWithGamepad extends CommandBase {
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
     final var rot = -m_rotLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getRightX(), 0.2), 3))* kMaxAngularSpeed;
-
+    if (DriveToTarget.currentMode != DriveToTarget.targetFound) {
     m_drive.drive(xSpeed, ySpeed, rot, fieldRelative);
+    }
     // m_drive.driveForwardAll(xSpeed/10);
     // m_drive.turnAroundAll(rot/50);
   }
@@ -85,14 +86,13 @@ public class DriveWithGamepad extends CommandBase {
       DriveToTarget.setMode(DriveToTarget.looking);
       
       } else {
-        //DriveToTarget.setMode(3);
+        
       }
     } else if (m_controller.getBButtonPressed()) {
 
     } else if (m_controller.getXButtonPressed()) {
 
     } else if (m_controller.getYButtonPressed()) {
-
-    }
+        }
   }
 }
