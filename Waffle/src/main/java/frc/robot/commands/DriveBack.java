@@ -5,21 +5,16 @@
 package frc.robot.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Autonomous;
 import frc.robot.subsystems.Drivetrain;
 import static frc.robot.Constants.*;
 
@@ -31,9 +26,10 @@ public class DriveBack extends CommandBase {
   Drivetrain m_drive;
   double m_distance;
   Trajectory m_trajectory;
-  Timer m_timer = new Timer();
+  Timer m_timerOpt = new Timer();
   double elapse;
   double runtime;
+  Timer m_timerAuto = new Timer();
   /** Creates a new AutoDouble. */
   public DriveBack(Drivetrain drive, double distance) {
     m_drive = drive;
@@ -50,13 +46,10 @@ public class DriveBack extends CommandBase {
     m_drive.resetOdometry(m_trajectory.getInitialPose());
     runtime = m_trajectory.getTotalTimeSeconds();
     */
-    m_timer.start();
-    m_timer.reset();
     elapse = 0;
     m_controller.setTolerance(0.07, 0.01);
 
   }
-
 
   public static Trajectory getStraightPath(double distance) {
     List<Pose2d> points = new ArrayList<>();
@@ -72,6 +65,9 @@ public class DriveBack extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() { 
+    // if (Drivetrain.resetting()){
+    //   return;
+    // }
     /*
     
     if (elapse<0){
@@ -83,9 +79,8 @@ public class DriveBack extends CommandBase {
     //System.out.println("time: " + elapse + "speeds:" + speeds);
     m_drive.odometryDrive(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond);
     */
-    elapse = m_timer.get();
     Pose2d pose = m_drive.getPose();
-    double correction = -kMaxSpeed*m_controller.calculate(pose.getX(), m_distance);
+    double correction = kMaxSpeed*m_controller.calculate(pose.getX(), m_distance);
     System.out.format("correction: %-3.1f x: %-3.1f angle: %-3.1f \n", correction, pose.getX(), pose.getRotation().getDegrees());
     m_drive.drive(correction, 0, 0, true);
     
@@ -95,16 +90,11 @@ public class DriveBack extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     //Autonomous.totalRuntime += elapse;
-
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(true) {
-      System.out.println("drove backsies");
-    }
-    return m_controller.atSetpoint();
-    
+    return m_controller.atSetpoint(); 
   }
 }

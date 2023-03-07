@@ -24,8 +24,8 @@ public final class Constants {
     public static final double kRadiansPerRot = Math.PI * 2/kTurnGearRatio;
 
     public static final double kMaxSpeed = 4; // 4 meters per second
-    public static final double kMaxAngularSpeed = 12 * Math.PI; // 3 rotation per second
-    public static final double kMaxAngularAcceleration = 6*Math.PI; // 1 rotations/s/s
+    public static final double kMaxAngularSpeed = 6 * Math.PI; // 3 rotation per second
+    public static final double kMaxAngularAcceleration = 2*Math.PI; // 1 rotations/s/s
 
     // public static final double kFrontLeftOffset = -7.3;
     // public static final double kFrontRightOffset = 74.5;
