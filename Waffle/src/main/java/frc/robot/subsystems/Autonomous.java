@@ -18,7 +18,7 @@ import frc.robot.commands.DrivePath;
 
 
 public class Autonomous extends SubsystemBase {
-  PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example path", new PathConstraints(4,3));
+  //PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example path", new PathConstraints(4,3));
   Drivetrain m_drive;
   
   /** Creates a new Autonomous. */

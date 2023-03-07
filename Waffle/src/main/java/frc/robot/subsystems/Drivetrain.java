@@ -10,8 +10,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.sensors.DriveGyro;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,10 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-
 import static frc.robot.Constants.*;
 
 public class Drivetrain extends SubsystemBase {
@@ -31,10 +28,10 @@ public class Drivetrain extends SubsystemBase {
   public static double kMaxAcceleration = 1.0;
   public static double kMaxVelocity = 1.0;
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
-  private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
-  private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
-  private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
+  private final Translation2d m_frontLeftLocation = new Translation2d(-delx, -dely);
+  private final Translation2d m_frontRightLocation = new Translation2d(-delx, dely);
+  private final Translation2d m_backLeftLocation = new Translation2d(delx, -dely);
+  private final Translation2d m_backRightLocation = new Translation2d(delx, dely);
 
   public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
 
@@ -46,25 +43,19 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d m_Field2d = new Field2d();
 
   static int count = 0;
-  //private final WPI_Pigeon2 m_gyro = new WPI_Pigeon2(13);
-  private AnalogGyro m_gyro = new AnalogGyro(0);
-
+  DriveGyro m_gyro = new DriveGyro(DriveGyro.gyros.BNO55);
+ 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
       new SwerveModulePosition(), new SwerveModulePosition() };
 
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
+
     m_gyro.reset();
 
-    // m_frontLeft.setOffset(kFrontLeftOffset);
-    // m_frontRight.setOffset(kFrontRightOffset);
-    // m_backLeft.setOffset(kBackLeftOffset);
-    // m_backRight.setOffset(kBackRightOffset);
-    // m_frontRight.setInverted();
-    // m_backRight.setInverted();
-    m_frontLeft.setInverted();
-    m_backLeft.setInverted();
+    //m_frontLeft.setDriveInverted();
+    m_backLeft.setDriveInverted();
 
     resetOdometry();
   }
@@ -130,16 +121,14 @@ public class Drivetrain extends SubsystemBase {
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
     updateOdometry();
-    // log();
+    //log();
   }
 
   public void log() {
-    SmartDashboard.putNumber("heading", m_gyro.getAngle());
-    // m_frontLeft.log();
-    // m_frontRight.log();
-    // m_backLeft.log();
-    // m_backRight.log();
-    
+    //String s=String.format("%s: %-3.1f",m_gyro.toString(),m_gyro.getRotation2d().getDegrees() );
+    //SmartDashboard.putString("heading", s);
+    SmartDashboard.putNumber("gyro", m_gyro.getAngle());
+     
   }
 
   /** Updates the field relative position of the robot. */
@@ -185,6 +174,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    log();
   }
 
 public Command exampleMethodCommand() {

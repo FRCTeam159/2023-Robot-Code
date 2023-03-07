@@ -20,9 +20,13 @@ public class ArmPosition extends SubsystemBase {
   public double twoAngle;
   public double wristAngle;
   public boolean hasWrist;
+  public boolean isOvershot;
+  double distance;
   
   /** Creates a new ArmPosition. */
   public ArmPosition(double one, double two, consType m) {
+    distance = Math.max(kMinRadius, Math.min(Math.sqrt(one*one + two*two), kMaxRadius));
+    isOvershot = distance == kMinRadius || distance == kMaxRadius? true: false;
     if(m == consType.pose){
       xPos = one;
       yPos = two;
@@ -54,9 +58,8 @@ public class ArmPosition extends SubsystemBase {
 
   public double[] calculateAngle(double x, double y) {
     double[] point = {x, y};
-    double distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-    double alpha = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(distance, 2)-Math.pow(kStageTwoLength, 2))/(2*kStageOneLength*distance))+Math.atan(point[0]/point[1]); // Stage 1 to ground angle
-    double beta = Math.acos((Math.pow(kStageOneLength, 2)+Math.pow(kStageTwoLength, 2)-Math.pow(distance, 2))/(2*kStageTwoLength*kStageOneLength)); // Top angle
+    double alpha = Math.acos((kStageOneLength*kStageOneLength+distance*distance-kStageTwoLength*kStageTwoLength)/(2*kStageOneLength*distance))+Math.atan(point[0]/point[1]); // Stage 1 to ground angle
+    double beta = Math.acos((kStageOneLength*kStageOneLength+kStageTwoLength*kStageTwoLength-distance*distance)/(2*kStageTwoLength*kStageOneLength)); // Top angle
     System.out.println(x + " " + y);
     double[] angles = {alpha, beta};
     return angles;
