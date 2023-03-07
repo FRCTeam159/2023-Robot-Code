@@ -71,14 +71,14 @@ public class PoseArm extends CommandBase {
       armController2= armController2 - 0.01;
     }
     
-    m_Arm.armPIDtest(armController1);
-    m_Arm.armPIDtesttwo(armController2);
+    //m_Arm.armPIDtest(armController1);
+    //m_Arm.armPIDtesttwo(armController2);
 
     m_Arm.log(); 
     m_Claw.clawControl();
     if(m_Controller.getYButtonPressed()){
       m_Arm.posSetpoint1();
-      //System.out.println("y pressed");
+      System.out.println("y pressed");
     }
     if(m_Controller.getBButtonPressed()){
       m_Arm.posHolding();

@@ -88,7 +88,6 @@ public class Claw extends SubsystemBase {
 
   public void clawControl(){
     if (m_Controller.getRightBumperPressed()) {
-      System.out.print("B button");
       if (mode == m.none || mode == m.eject){
         clawSolenoidState(false);
         mode = m.pickup;
