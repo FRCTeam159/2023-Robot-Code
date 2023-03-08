@@ -99,6 +99,7 @@ public class SwerveModule extends SubsystemBase {
   public void reset(){
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
+    System.out.println(name + " reset");
     cnt=0;
   }
   void setOptimize(boolean t){
@@ -205,6 +206,7 @@ public class SwerveModule extends SubsystemBase {
   }
   
   public void driveForward(double dist) {
+   dist = m_inverted? -dist: dist;
     m_driveMotor.setVoltage(dist);
   }
   

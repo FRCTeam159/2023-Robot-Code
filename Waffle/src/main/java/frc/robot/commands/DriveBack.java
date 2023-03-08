@@ -8,11 +8,14 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
+import static frc.robot.Constants.*;
+
 
 public class DriveBack extends CommandBase {
-  private PIDController m_xController = new PIDController(0.1, 0, 1);
+  private PIDController m_xController = new PIDController(0.5, 0, 0);
   Drivetrain m_drive;
   double m_target;
+  int count = 0;
   /** Creates a new DriveBack. 
    * @param i
    * @param m_drive */
@@ -25,6 +28,7 @@ public class DriveBack extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_drive.resetOdometry();
     m_xController.setTolerance(0.05, .08);
     m_xController.setSetpoint(m_target);
   }
@@ -34,7 +38,10 @@ public class DriveBack extends CommandBase {
   public void execute() {
     Pose2d pose = m_drive.getPose();
     double x = pose.getX();
-    double error = m_xController.calculate(x, m_target);
+    double error = m_xController.calculate(x, m_target) * kMaxSpeed;
+    if((count % 10) == 0)
+    System.out.format("x: %-1.2f target: %-1.2f correction: %-1.2f\n", x, m_target, error);
+    count++;
     m_drive.drive(error, 0, 0, false);
   }
 
