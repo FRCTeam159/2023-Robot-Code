@@ -34,14 +34,14 @@ public class Drivetrain extends SubsystemBase {
 	private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
 	private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
 
-  public static String chnlnames[] = { "FL", "FR", "BR", "BL" };
+  public static String chnlnames[] = { "FL", "FR", "BL", "BR" };
 
   private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn,1);
   private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn,2);
   private final SwerveModule m_backRight = new SwerveModule(kBr_Drive, kBr_Turn,3);
   private final SwerveModule m_backLeft = new SwerveModule(kBl_Drive, kBl_Turn, 4);
 
-  private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backLeft,m_backRight};
+  private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backRight,m_backLeft};
 
   private final Field2d m_Field2d = new Field2d();
   Timer m_timer = new Timer();
@@ -62,6 +62,7 @@ public class Drivetrain extends SubsystemBase {
 
     //m_frontLeft.setDriveInverted();
     //m_backLeft.setDriveInverted();
+    m_frontRight.setDriveInverted();
     m_backRight.setDriveInverted();
 
     resetOdometry();
@@ -80,6 +81,7 @@ public class Drivetrain extends SubsystemBase {
  
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
+
   /*
    * Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings.
    * The numbers used

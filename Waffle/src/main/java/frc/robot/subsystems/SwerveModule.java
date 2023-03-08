@@ -37,7 +37,7 @@ public class SwerveModule extends SubsystemBase {
 
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(0.3, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.4, 0, 0);
 
   private final PIDController m_turningPIDController = new PIDController(
       0.3,
@@ -153,10 +153,7 @@ public class SwerveModule extends SubsystemBase {
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
     SwerveModuleState state;
-    if(m_optimize)
       state= SwerveModuleState.optimize(desiredState, getRotation2d());
-    else
-      state = desiredState;
     //System.out.println("optimize = " + m_optimize);
     double velocity=getVelocity();
     // Calculate the drive output from the drive PID controller.
@@ -169,13 +166,14 @@ public class SwerveModule extends SubsystemBase {
     double turnOutput = m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
-    double set_drive=driveOutput+driveFeedforward;
+
+    double set_drive=driveOutput +driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;
 
     //System.out.println(set_drive);
     //System.out.println(set_turn);
 
-    m_driveMotor.set(set_drive);
+    driveForward(set_drive);
     m_turningMotor.set(set_turn);
     
     if(debug){
@@ -202,7 +200,7 @@ public class SwerveModule extends SubsystemBase {
 
   public void setDriveInverted(){
     m_inverted = true;
-    m_driveMotor.setInverted(true);
+  //m_driveMotor.setInverted(true);
   }
   
   public void driveForward(double dist) {

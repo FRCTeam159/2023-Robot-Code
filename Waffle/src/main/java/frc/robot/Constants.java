@@ -18,12 +18,12 @@ public final class Constants {
     static public final double kDriveGearRatio=6.67;  // MK4i drive (standard)
     static public final double kTurnGearRatio=30; // MK4i turn (all)
   
-    public static final double kWheelRadius = 4;
+    public static final double kWheelRadius = 2;
     public static final int kEncoderResolution = 42;
-    public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
+    public static final double kDistPerRot =(Units.inchesToMeters(kWheelRadius)* 2*Math.PI)/kDriveGearRatio;
     public static final double kRadiansPerRot = Math.PI * 2/kTurnGearRatio;
 
-    public static final double kMaxSpeed = 4; // 4 meters per second
+    public static final double kMaxSpeed = 2; // 4 meters per second
     public static final double kMaxAngularSpeed = 6 * Math.PI; // 3 rotation per second
     public static final double kMaxAngularAcceleration = 2*Math.PI; // 1 rotations/s/s
 
