@@ -45,10 +45,11 @@ public final class Constants {
     public static final double kConeTargetArea = 12;
     public static final double kPostTargetArea = 2;
 
-    public static final double kStageOneLength = Units.inchesToMeters(36);
+    public static final double kStageOneLength = Units.inchesToMeters(36.18);
     public static final double kEncoderOnePosConversionFactor = 1/465.23;
-    public static final double kStageTwoLength = Units.inchesToMeters(25.5);
+    public static final double kStageTwoLength = Units.inchesToMeters(27.78);
     public static final double kEncoderTwoPosConversionFactor = 1/441.35;
+    public static final double kEncoderWristPosConversionFactor = 1/252.0;
 
     public static final double kMinRadius = Math.abs(kStageOneLength-kStageTwoLength);
     public static final double kMaxRadius = kStageOneLength + kStageTwoLength;
@@ -74,10 +75,10 @@ public final class Constants {
 
     public static final int kStageOneChannel = 16;
     public static final int kStageTwoChannel = 17;//haha
-    public static final int kWristChannel = 13;
+    public static final int kWristChannel = 14;
 
     public static final int kClawMotorID1 = 15;
-    public static final int kClawMotorID2 = 14;
+    public static final int kClawMotorID2 = 13;
 
     // public static final int 
 

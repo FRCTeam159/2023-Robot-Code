@@ -27,9 +27,9 @@ public class Arm extends Thread{
   public RelativeEncoder encoderWrist;
   public SparkMaxLimitSwitch stageOneForwardLimit;
   //TODO tune PID
-  public PIDController onePID = new PIDController(5, 0, 0);
-  public PIDController twoPID = new PIDController(2, 0, 0);
-  public PIDController wristPID = new PIDController(0.8, 0, 0);
+  public PIDController onePID = new PIDController(20, 0, 0);
+  public PIDController twoPID = new PIDController(20, 0, 0);
+  public PIDController wristPID = new PIDController(6, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
 
@@ -44,25 +44,35 @@ public class Arm extends Thread{
     encoderTwo.setPositionConversionFactor(kEncoderTwoPosConversionFactor);
     wrist = new CANSparkMax(kWristChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     encoderWrist = wrist.getEncoder();
+    encoderWrist.setPositionConversionFactor(kEncoderWristPosConversionFactor);
+
     onePID.setTolerance(0.1);
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
+
     SmartDashboard.putString("simulationtest", "default");
     SmartDashboard.putString("encoders", "default");
+
     encoderOne.setPosition(0);
     encoderTwo.setPosition(0);
+    encoderWrist.setPosition(0);
+
     stageOneForwardLimit = stageOne.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   }
 
   public double getStageOneAngle() {
     // return the absolute (robot-relative) angle of the first stage
-    return encoderOne.getPosition();
+    return encoderOne.getPosition()+0.25;
   }
 
   public double getStageTwoAngle() {
     // return the absolute (robot-relative) angle of the first stage
     //System.out.println(encoderTwo.getPositionConversionFactor());
-    return encoderTwo.getPosition();
+    return -encoderTwo.getPosition()+0.5;
+  }
+
+  public double getWristAngle(){
+    return encoderWrist.getPosition()+0.5;
   }
 
   public void setStageOneZero() {
@@ -75,12 +85,12 @@ public class Arm extends Thread{
   }  
 
   public void setAngle(ArmPosition pos) {
-    double oneOut = onePID.calculate(getStageOneAngle(), -pos.oneAngle/(2*Math.PI));
-    double twoOut = twoPID.calculate(getStageTwoAngle(), -pos.twoAngle/(2*Math.PI));
-    double wristOut = wristPID.calculate(encoderWrist.getPosition(), pos.wristAngle);
-    stageOne.setVoltage(oneOut);
-    stageTwo.setVoltage(twoOut);
-    wrist.setVoltage(wristOut);
+    double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
+    double twoOut = twoPID.calculate(getStageTwoAngle(), pos.twoAngle/(2*Math.PI));
+    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI));
+    stageOne.set(oneOut);
+    stageTwo.set(-twoOut);
+    wrist.set(wristOut);
     //System.out.println(oneOut);
   }
 
@@ -125,13 +135,13 @@ public class Arm extends Thread{
   // holding position
   public void posHolding(){
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.4, 0.4, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
     System.out.println("pos is holding");
   }
 
   public void posSetpoint1(){
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.5, 0.5, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(1, 1, ArmPosition.consType.pose));
   }
 
   public void posTrim(double r){
@@ -144,9 +154,9 @@ public class Arm extends Thread{
   //pos code end
 
   public void log() {
-    String s = targetFeeder.size() > 0?String.format("alpha: %-3.2f beta: %-3.2f", targetFeeder.get(0).oneAngle/(2*Math.PI), targetFeeder.get(0).twoAngle/(2*Math.PI)): "no things";
+    String s = targetFeeder.size() > 0?String.format("alpha: %-3.2f beta: %-3.2f wrist: %-3.2f", targetFeeder.get(0).oneAngle/(2*Math.PI), targetFeeder.get(0).twoAngle/(2*Math.PI), targetFeeder.get(0).wristAngle/(2*Math.PI)): "no things";
     SmartDashboard.putString("simulationtest", s);
-    String t = String.format("encoder one: %-3.2f encoder two: %-3.2f", getStageOneAngle(), getStageTwoAngle());
+    String t = String.format("encoder one: %-3.2f encoder two: %-3.2f encoder wrist: %-3.2f", getStageOneAngle(), getStageTwoAngle(), getWristAngle());
     SmartDashboard.putString("encoders", t);
   }
 

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
@@ -31,14 +32,14 @@ public class ArmPosition extends SubsystemBase {
       xPos = one;
       yPos = two;
       System.out.println("one = " + one + "two = " + two);
-      double[] temp = calculateAngle(one, two);
+      double[] temp = calculateAngle(xPos, yPos);
       oneAngle = temp[0];
       twoAngle = temp[1];
     }
     if(m == consType.angle){
       oneAngle = one;
       twoAngle = two;
-      double[] temp = calculatePos(one, two);
+      double[] temp = calculatePos(oneAngle, twoAngle);
       xPos = temp[0];
       yPos = temp[1];
     }

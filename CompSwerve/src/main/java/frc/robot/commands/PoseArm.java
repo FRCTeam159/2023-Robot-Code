@@ -28,6 +28,8 @@ public class PoseArm extends CommandBase {
   double armController1;
 
   double stageOneOffset;
+  double stageTwoOffset;
+  double wristOffset;
   
   public boolean lastStageOneForwardLimitState = true;
   /** Creates a new PoseArm. */
@@ -71,14 +73,14 @@ public class PoseArm extends CommandBase {
       armController2= armController2 - 0.01;
     }
     
-    m_Arm.armPIDtest(armController1);
-    m_Arm.armPIDtesttwo(armController2);
+    //m_Arm.armPIDtest(armController1);
+    //m_Arm.armPIDtesttwo(armController2);
 
     m_Arm.log(); 
     m_Claw.clawControl();
     if(m_Controller.getYButtonPressed()){
       m_Arm.posSetpoint1();
-      //System.out.println("y pressed");
+      System.out.println("y pressed");
     }
     if(m_Controller.getBButtonPressed()){
       m_Arm.posHolding();
@@ -88,10 +90,13 @@ public class PoseArm extends CommandBase {
   }
 
 
-  public void setArmOffsets(BNO055 gyro){
-    double theta = Math.atan(gyro.getVector()[2]/gyro.getVector()[0]);
-    stageOneOffset = -theta/(2*Math.PI);
-    System.out.println("fancy thing: " + theta/(2*Math.PI));
+  public void setArmOffsets(BNO055 elbow, BNO055 wrist){
+    double theta = Math.atan(elbow.getVector()[2]/elbow.getVector()[0]);
+    stageTwoOffset = -theta/(2*Math.PI);
+    System.out.println("one offset: " + theta/(2*Math.PI));
+    theta = Math.atan(wrist.getVector()[2]/wrist.getVector()[0]);
+    stageTwoOffset = -theta/(2*Math.PI);
+    System.out.println("wrist offset: " + theta/(2*Math.PI));
   }
   
 
