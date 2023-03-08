@@ -55,7 +55,8 @@ public class Drivetrain extends SubsystemBase {
     m_gyro.reset();
 
     //m_frontLeft.setDriveInverted();
-    m_backLeft.setDriveInverted();
+    //m_backLeft.setDriveInverted();
+    m_backRight.setDriveInverted();
 
     resetOdometry();
   }

@@ -104,6 +104,7 @@ public class SwerveModule extends SubsystemBase {
     //SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
+    System.out.println(name + " reset");
     cnt=0;
   }
   public double heading(){
@@ -199,7 +200,7 @@ public class SwerveModule extends SubsystemBase {
   }
   
   public void driveForward(double dist) {
-   // dist = m_inverted? -dist: dist;
+   dist = m_inverted? -dist: dist;
     m_driveMotor.setVoltage(dist);
   }
   public void turnAround(double dist) {
