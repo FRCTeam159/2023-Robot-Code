@@ -81,12 +81,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    // return new DriveToPlatform(m_Drivetrain);
-    //return new DrivePath(m_Drivetrain);
-    return new DriveBack(m_Drivetrain, 0.5);
-  }
-
-  public void teleopInit() {
-    m_Drivetrain.reset();
+    return m_auto.getCommand();
   }
 }
