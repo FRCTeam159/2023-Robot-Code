@@ -27,10 +27,24 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
 
-  public BNO055 m_gyroWrist;
-  private BNO055OffsetData wristOffsets = new BNO055OffsetData(1, 34, -27, -24, 0, 1, -2, -101, 85, -121, 1066);
-  public BNO055 m_gyroElbow;
-  private BNO055OffsetData elbowOffsets = new BNO055OffsetData(1, 34, -27, -24, 0, 1, -2, -101, 85, -121, 1066);
+  private static BNO055OffsetData wristOffsets = new BNO055OffsetData(-10, -32, -17, -24, -1, -4, 0, -63, -42, 381, 524);
+  private static BNO055 m_gyroWrist = new BNO055(
+    I2C.Port.kMXP,
+    BNO055.BNO055_ADDRESS_A,
+    "BNO055 wrist",
+    BNO055.opmode_t.OPERATION_MODE_NDOF,
+    BNO055.vector_type_t.VECTOR_GRAVITY,
+    wristOffsets
+  );
+  private BNO055OffsetData elbowOffsets = new BNO055OffsetData(-6, 2, -1, -24, -1, -4, 0, -105, -16, -62, 624);
+  public BNO055 m_gyroElbow = new BNO055(
+    I2C.Port.kMXP,
+    BNO055.BNO055_ADDRESS_B,
+    "BNO055 elbow",
+    BNO055.opmode_t.OPERATION_MODE_NDOF,
+    BNO055.vector_type_t.VECTOR_GRAVITY,
+    elbowOffsets
+  ); 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -42,23 +56,6 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     m_robotContainer.robotInit();
 
-    m_gyroWrist = BNO055.getInstance(
-      BNO055.opmode_t.OPERATION_MODE_NDOF,
-      BNO055.vector_type_t.VECTOR_GRAVITY,
-      I2C.Port.kMXP,
-      BNO055.BNO055_ADDRESS_A,
-      wristOffsets,
-      "BNO055 wrist"
-      );
-
-    m_gyroElbow = BNO055.getInstance(
-      BNO055.opmode_t.OPERATION_MODE_NDOF,
-      BNO055.vector_type_t.VECTOR_GRAVITY,
-      I2C.Port.kMXP,
-      BNO055.BNO055_ADDRESS_B,
-      elbowOffsets,
-      "BNO055 elbow"
-    );
   }
 
   /**
@@ -116,8 +113,10 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     m_robotContainer.teleopInit();
-    m_robotContainer.m_PoseArm.setArmOffsets(m_gyroWrist);
-    //BNO055OffsetData offsets = m_gyroShldr.readOffsets();
+    m_robotContainer.m_PoseArm.setArmOffsets(m_gyroElbow, m_gyroWrist);
+    
+    // m_gyroElbow.readOffsets();
+    // m_gyroWrist.readOffsets();
   }
 
   /** This function is called periodically during operator control. */

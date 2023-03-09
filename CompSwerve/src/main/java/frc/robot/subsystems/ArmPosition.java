@@ -24,6 +24,8 @@ public class ArmPosition extends SubsystemBase {
   public boolean isOvershot;
   double distance;
   
+//Y AND X ARE SWAPPED
+
   /** Creates a new ArmPosition. */
   public ArmPosition(double one, double two, consType m) {
     distance = Math.max(kMinRadius, Math.min(Math.sqrt(one*one + two*two), kMaxRadius));

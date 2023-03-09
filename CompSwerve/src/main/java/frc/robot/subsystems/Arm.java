@@ -26,10 +26,14 @@ public class Arm extends Thread{
   public CANSparkMax wrist;
   public RelativeEncoder encoderWrist;
   public SparkMaxLimitSwitch stageOneForwardLimit;
+
+  public double offset1;
+  public double offset2;
+  public double offsetW;
   //TODO tune PID
   public PIDController onePID = new PIDController(20, 0, 0);
   public PIDController twoPID = new PIDController(20, 0, 0);
-  public PIDController wristPID = new PIDController(6, 0, 0);
+  public PIDController wristPID = new PIDController(3, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
 
@@ -46,9 +50,9 @@ public class Arm extends Thread{
     encoderWrist = wrist.getEncoder();
     encoderWrist.setPositionConversionFactor(kEncoderWristPosConversionFactor);
 
-    onePID.setTolerance(0.1);
-    twoPID.setTolerance(1);
-    wristPID.setTolerance(1);
+    onePID.setTolerance(0.5);
+    twoPID.setTolerance(0.5);
+    wristPID.setTolerance(0.5);
 
     SmartDashboard.putString("simulationtest", "default");
     SmartDashboard.putString("encoders", "default");
@@ -56,8 +60,6 @@ public class Arm extends Thread{
     encoderOne.setPosition(0);
     encoderTwo.setPosition(0);
     encoderWrist.setPosition(0);
-
-    stageOneForwardLimit = stageOne.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   }
 
   public double getStageOneAngle() {
@@ -68,11 +70,11 @@ public class Arm extends Thread{
   public double getStageTwoAngle() {
     // return the absolute (robot-relative) angle of the first stage
     //System.out.println(encoderTwo.getPositionConversionFactor());
-    return -encoderTwo.getPosition()+0.5;
+    return -encoderTwo.getPosition()+0.5;//offset2;
   }
 
   public double getWristAngle(){
-    return encoderWrist.getPosition()+0.5;
+    return -encoderWrist.getPosition()+0.5;
   }
 
   public void setStageOneZero() {
@@ -87,10 +89,10 @@ public class Arm extends Thread{
   public void setAngle(ArmPosition pos) {
     double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
     double twoOut = twoPID.calculate(getStageTwoAngle(), pos.twoAngle/(2*Math.PI));
-    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI));
+    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI)-0.042);
     stageOne.set(oneOut);
     stageTwo.set(-twoOut);
-    wrist.set(wristOut);
+    wrist.set(-wristOut);
     //System.out.println(oneOut);
   }
 
@@ -102,7 +104,10 @@ public class Arm extends Thread{
       setAngle(targetFeeder.get(0));
       //System.out.println("going to: " + targetFeeder.get(0));
       if(armAtSetPoint() && targetFeeder.size() > 1){
-        targetFeeder.remove(0);
+        ArrayList<ArmPosition> temp = new ArrayList<ArmPosition>(10);
+        temp.addAll(targetFeeder.subList(1, targetFeeder.size()-1));
+        targetFeeder.clear();
+        targetFeeder.addAll(temp);
         System.out.println("popping feed");
       }
   }
@@ -139,9 +144,20 @@ public class Arm extends Thread{
     System.out.println("pos is holding");
   }
 
-  public void posSetpoint1(){
+  public void posPickupGround(){
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(1, 1, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.07, 1, ArmPosition.consType.pose));
+  }
+
+  public void posDropMid(){
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(1.1, 1, ArmPosition.consType.pose));
+  }
+
+  public void posDropHigh(){
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(Math.PI/2, Math.PI, Math.PI));
+    targetFeeder.add(new ArmPosition(0.8, Math.PI, Math.PI));
   }
 
   public void posTrim(double r){
@@ -158,6 +174,7 @@ public class Arm extends Thread{
     SmartDashboard.putString("simulationtest", s);
     String t = String.format("encoder one: %-3.2f encoder two: %-3.2f encoder wrist: %-3.2f", getStageOneAngle(), getStageTwoAngle(), getWristAngle());
     SmartDashboard.putString("encoders", t);
+    //System.out.println("AT SET POINT: "+ armAtSetPoint());
   }
 
   public void run(){

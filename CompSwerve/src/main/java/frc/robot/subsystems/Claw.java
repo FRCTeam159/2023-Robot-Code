@@ -62,33 +62,33 @@ public class Claw extends SubsystemBase {
       m_clawMotor1.set(0);
       m_clawMotor2.set(0);
     } else if(state == 1){
-      m_clawMotor1.set(-.3); // big suck
-      m_clawMotor2.set(-.3);
+      m_clawMotor1.set(.3); // big suck
+      m_clawMotor2.set(.3);
     } else if(state == 2){
-      m_clawMotor1.set(-0.02); //small suck
-      m_clawMotor2.set(-0.02);
+      m_clawMotor1.set(0.02); //small suck
+      m_clawMotor2.set(0.02);
     } else if(state == 3){
-      m_clawMotor1.set(1); //big throw
-      m_clawMotor2.set(1);
+      m_clawMotor1.set(-1); //big throw
+      m_clawMotor2.set(-1);
     } else if(state == 4){
-      m_clawMotor1.set(0.25);
-      m_clawMotor2.set(0.25);
+      m_clawMotor1.set(-0.25);
+      m_clawMotor2.set(-0.25);
     }
   }
 
   public void clawSolenoidState(boolean grab) {
     if (grab) {
-      m_clawSolenoid1.set(Value.kForward);
-      m_clawSolenoid2.set(Value.kForward);
-    } else {
       m_clawSolenoid1.set(Value.kReverse);
       m_clawSolenoid2.set(Value.kReverse);
+    } else {
+      m_clawSolenoid1.set(Value.kForward);
+      m_clawSolenoid2.set(Value.kForward);
     }
   }
 
   public void clawControl(){
     if (m_Controller.getRightBumperPressed()) {
-      if (mode == m.none || mode == m.eject){
+      if (mode == m.none || mode == m.eject || mode == m.drop || mode == m.smallEject){
         clawSolenoidState(false);
         mode = m.pickup;
       }else if(mode == m.pickup){
@@ -99,12 +99,19 @@ public class Claw extends SubsystemBase {
         mode = m.drop;
         m_Timer.reset();
     }
+    System.out.println(mode.name()+ "this is the mode");
     }
 
     if(m_Controller.getLeftBumperPressed()){
-      clawSolenoidState(false);
-      mode = m.smallEject;
-      m_Timer.reset();
+      if(mode != m.smallEject){
+        clawSolenoidState(false);
+        mode = m.smallEject;
+        m_Timer.reset();
+      } else{
+        clawSolenoidState(false);
+        mode = m.none;
+      }
+      
     }
 
     switch(mode){
@@ -128,7 +135,7 @@ public class Claw extends SubsystemBase {
 
     }
 
-    if(mode == m.drop && m_Timer.get() > 3){
+    if(mode == m.drop && m_Timer.get() > 1){
       mode = m.none;
       clawSolenoidState(true);
     }
