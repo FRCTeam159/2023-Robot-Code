@@ -8,8 +8,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.sensors.DriveGyro;
 import edu.wpi.first.math.VecBuilder;
@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import static frc.robot.Constants.*;
 
@@ -28,59 +29,56 @@ public class Drivetrain extends SubsystemBase {
   public static double kMaxAcceleration = 1.0;
   public static double kMaxVelocity = 1.0;
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(-delx, -dely);
-  private final Translation2d m_frontRightLocation = new Translation2d(-delx, dely);
-  private final Translation2d m_backLeftLocation = new Translation2d(delx, -dely);
-  private final Translation2d m_backRightLocation = new Translation2d(delx, dely);
+  private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
+	private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
+	private final Translation2d m_backLeftLocation = new Translation2d(-delx, dely);
+	private final Translation2d m_backRightLocation = new Translation2d(-delx, -dely);
 
-  public static String chnlnames[] = { "BR", "BL", "FL", "FR" };
+  public static String chnlnames[] = { "FL", "FR", "BL", "BR" };
 
   private final SwerveModule m_frontLeft = new SwerveModule(kFl_Drive, kFl_Turn,1);
   private final SwerveModule m_frontRight = new SwerveModule(kFr_Drive, kFr_Turn,2);
   private final SwerveModule m_backRight = new SwerveModule(kBr_Drive, kBr_Turn,3);
   private final SwerveModule m_backLeft = new SwerveModule(kBl_Drive, kBl_Turn, 4);
 
+  private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backRight,m_backLeft};
+
   private final Field2d m_Field2d = new Field2d();
+  Timer m_timer = new Timer();
+
+  static boolean m_optimize=true;
 
   static int count = 0;
   DriveGyro m_gyro = new DriveGyro(DriveGyro.gyros.BNO55);
- 
+  double last_heading = 0; 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
       new SwerveModulePosition(), new SwerveModulePosition() };
 
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
-
+    SmartDashboard.putBoolean("optimize", m_optimize);
     m_gyro.reset();
 
     //m_frontLeft.setDriveInverted();
-    m_backLeft.setDriveInverted();
+    //m_backLeft.setDriveInverted();
+    m_frontRight.setDriveInverted();
+    m_backRight.setDriveInverted();
 
     resetOdometry();
   }
 
   private void resetPositions() {
-    m_frontLeft.reset();
-    m_frontRight.reset();
-    m_backLeft.reset();
-    m_backRight.reset();
+    for(int i=0;i<modules.length;i++)
+      modules[i].reset();
     updatePositions();
   }
 
-  public void reset() {
-    resetOdometry();
-    log();
-  }
-
   private void updatePositions() {
-    m_positions[0] = m_frontLeft.getPosition();
-    m_positions[1] = m_frontRight.getPosition();
-    m_positions[2] = m_backLeft.getPosition();
-    m_positions[3] = m_backRight.getPosition();
+    for(int i=0;i<modules.length;i++)
+      m_positions[i] = modules[i].getPosition();
   }
-
-  
+ 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
 
@@ -91,16 +89,31 @@ public class Drivetrain extends SubsystemBase {
    */
   private final SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(
       m_kinematics,
-      getGyroAngle(),
+      getRotation2d(),
       m_positions,
       new Pose2d(),
       VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)), // drive confidence stds
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))); // turn confidence stds
 
-  public Rotation2d getGyroAngle() {
-    return m_gyro.getRotation2d();
+  public Rotation2d getRotation2d() {
+    double angle =  m_gyro.getAngle();
+    angle = unwrap(last_heading, angle);
+    last_heading = angle;
+    return Rotation2d.fromDegrees(angle);
   }
 
+  public double getHeading(){
+    return getRotation2d().getDegrees();
+  }
+  public void driveForwardAll(double dist) {
+    for(int i=0;i<modules.length;i++)
+      modules[i].driveForward(dist);
+   
+  }
+  public void turnAroundAll(double dist) {
+    for(int i=0;i<modules.length;i++)
+      modules[i].turnAround(dist);
+  }
   /**
    * Method to drive the robot using joystick info.
    *
@@ -111,30 +124,31 @@ public class Drivetrain extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    var swerveModuleStates = m_kinematics.toSwerveModuleStates(
+    SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getGyroAngle())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_backLeft.setDesiredState(swerveModuleStates[2]);
-    m_backRight.setDesiredState(swerveModuleStates[3]);
+    for(int i=0;i<modules.length;i++)
+      modules[i].setDesiredState(swerveModuleStates[i]);
+   
     updateOdometry();
-    //log();
   }
 
   public void log() {
-    //String s=String.format("%s: %-3.1f",m_gyro.toString(),m_gyro.getRotation2d().getDegrees() );
-    //SmartDashboard.putString("heading", s);
-    SmartDashboard.putNumber("gyro", m_gyro.getAngle());
-     
+    SmartDashboard.putNumber("Gyro", getHeading());
+    Pose2d pose=getPose();
+    String s=String.format("X:%-2.1f Y:%-2.1f H:%-2.1f",
+    pose.getX(),pose.getY(),pose.getRotation().getDegrees());
+    SmartDashboard.putString("Pose", s);
+    
+    SmartDashboard.putBoolean("optimize", m_optimize);
   }
-
+     
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     updatePositions();
-    m_poseEstimator.update(getGyroAngle(), m_positions);
+    m_poseEstimator.update(getRotation2d(), m_positions);
     m_Field2d.setRobotPose(getPose());
 
     // Also apply vision measurements. We use 0.3 seconds in the past as an example
@@ -150,7 +164,7 @@ public class Drivetrain extends SubsystemBase {
   public void resetOdometry() {
     m_gyro.reset();
     resetPositions();
-    m_poseEstimator.resetPosition(getGyroAngle(),
+    m_poseEstimator.resetPosition(getRotation2d(),
         m_positions,
         new Pose2d(0, 0, new Rotation2d()));
   }
@@ -158,27 +172,54 @@ public class Drivetrain extends SubsystemBase {
     return m_poseEstimator.getEstimatedPosition();
   }
 
-  public void driveForwardAll(double dist) {
-    m_backLeft.driveForward(dist);
-    m_backRight.driveForward(dist);
-    m_frontLeft.driveForward(dist);
-    m_frontRight.driveForward(dist);
+    // removes heading discontinuity at 180 degrees
+	public static double unwrap(double previous_angle, double new_angle) {
+		double d = new_angle - previous_angle;
+		d = d >= 180 ? d - 360 : (d <= -180 ? d + 360 : d);
+		return previous_angle + d;
+	}
+  public void reset() {
+    // System.out.println("Drivetrain.reset before aligned="+wheelsAreAligned());
+    // showWheelPositions();
+    // m_optimize = false;
+    // setOptimize(m_optimize);
+    // m_timer.reset();
   }
-  public void turnAroundAll(double dist) {
-    m_backLeft.turnAround(dist);
-    m_backRight.turnAround(dist);
-    m_frontLeft.turnAround(dist);
-    m_frontRight.turnAround(dist);
+ 
+  // public static boolean resetting(){
+  //   return !m_optimize;
+  // }
+  public boolean wheelsAreAligned(){
+    for(int i=0;i<modules.length;i++){
+      for(int j=0;j<modules.length;j++){
+        double h1=Math.toDegrees(modules[i].heading());
+        double h2=Math.toDegrees(modules[j].heading());
+        if(h1-h2>90)
+          return false;
+      }
+    }
+    return true;
   }
-
+  public void showWheelPositions(){
+    for(int i=0;i<modules.length;i++)
+      modules[i].showWheelPosition();  
+  }
+  public void setOptimize(boolean b){
+    for(int i=0;i<modules.length;i++)
+      modules[i].setOptimize(b);  
+  }
+ 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // if(!m_optimize && m_timer.get()> 0.5){
+    //   System.out.println("Drivetrain.reset after aligned="+wheelsAreAligned());
+    //   showWheelPositions();
+    //   m_optimize = true;
+    //   setOptimize(m_optimize);
+    //   resetPositions();
+    // }
     log();
   }
 
-public Command exampleMethodCommand() {
-	return null;
-}
 
 }

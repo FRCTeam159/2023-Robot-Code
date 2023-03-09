@@ -9,6 +9,8 @@ import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.XboxController;
 
 import static frc.robot.Constants.*;
@@ -25,6 +27,8 @@ public class DriveWithGamepad extends CommandBase {
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
+  public AddressableLED m_led;
+  public AddressableLEDBuffer m_ledBuffer;
 
   /**
    * Creates a new ExampleCommand.
@@ -42,12 +46,28 @@ public class DriveWithGamepad extends CommandBase {
   @Override
   public void initialize() {
     m_drive.reset();
+    m_led = new AddressableLED(9);
+    m_ledBuffer = new AddressableLEDBuffer(60);
+    m_led.setLength(m_ledBuffer.getLength());
+    m_led.setData(m_ledBuffer);
+    m_led.start();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveWithJoystick(false);
+    ledSetter();
+    driveWithJoystick(true);
+    if (ledSetter()) {
+      for (var i = 0; i<m_ledBuffer.getLength(); i++) {
+        m_ledBuffer.setRGB(i, 255,0,0);
+      } 
+    } else {
+      for (var i = 0; i<m_ledBuffer.getLength(); i++) {
+        m_ledBuffer.setRGB(i, 0,255,0);
+      }
+    }
     //testLimelight();
     //testClaw();
 
@@ -82,5 +102,20 @@ public class DriveWithGamepad extends CommandBase {
     m_drive.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
     // m_drive.driveForwardAll(xSpeed);
     // m_drive.turnAroundAll(rot);
+  }
+
+  public boolean ledSetter()
+  {
+
+    final var xSpeed = -m_xspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftY(), 0.2)) * kMaxSpeed;
+    final var ySpeed = -m_yspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftX(), 0.2)) * kMaxSpeed;
+
+    if(xSpeed > 0 && ySpeed > 0)
+    {
+      return true;
+    } else {
+      return false;
+    }
+  
   }
 }

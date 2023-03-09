@@ -37,6 +37,7 @@ public class RobotContainer {
   //Subsystems
   private final Drivetrain m_Drivetrain = new Drivetrain();
   private final Autonomous m_auto = new Autonomous(m_Drivetrain);
+  private final DriveWithGamepad m_DriveWithGamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
 
   //private final Camera m_Camera = new Camera();
   private final TargetMgr m_TargetMgr = new TargetMgr();
@@ -44,27 +45,18 @@ public class RobotContainer {
   private final Arm m_Arm = new Arm(m_Limelight);
 
   //commands
-  private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
-  private final PoseArm m_PoseArm = new PoseArm(m_Arm, m_Controller);
-  private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
-  private final DriveToTarget m_DriveToTarget = new DriveToTarget(m_Drivetrain);
-  private final DriveToPlatform m_DriveToPlatform = new DriveToPlatform(m_Drivetrain);
-
-  
-
+   
   //private final DetectorAprilTag m_apriltag = new DetectorAprilTag(m_Camera);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_Drivetrain.setDefaultCommand(new DriveWithGamepad(m_Drivetrain, m_Controller));
+    m_Drivetrain.setDefaultCommand(m_DriveWithGamepad);
     // Configure the button bindings
     configureBindings();
   }
   public void robotInit() {
    // m_apriltag.start();
    m_Limelight.start();
-   m_DriveToTarget.start();
-
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -74,6 +66,9 @@ public class RobotContainer {
    */
   private void configureBindings() {}
 
+  public void autonomousInit() {
+    m_Drivetrain.reset();
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
