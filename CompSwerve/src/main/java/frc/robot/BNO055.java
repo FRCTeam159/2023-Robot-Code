@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *    private static BNO055 imu;
  *    
  *    public Robot() {
- *        imu = BNO055.getInstance(BNO055.opmode_t.OPERATION_MODE_IMUPLUS,
+ *        imu = BNO055(BNO055.opmode_t.OPERATION_MODE_IMUPLUS,
  *        		BNO055.vector_type_t.VECTOR_EULER);
  *    }
  * 
@@ -74,15 +74,13 @@ public class BNO055 {
 	public static final byte BNO055_ADDRESS_A = 0x28;
 	public static final byte BNO055_ADDRESS_B = 0x29;
 	public static final int BNO055_ID = 0xA0;
-
-	private static BNO055 instance;
 	
-	private static I2C imu;
-	private static String name; // used to label logs and prints
-	private static int _mode;
-	private static opmode_t requestedMode; //user requested mode of operation.
-	private static vector_type_t requestedVectorType;
-	private static BNO055OffsetData offsets;  // Offsets to write during initialization.
+	private I2C imu;
+	private String name; // used to label logs and prints
+	private int _mode;
+	private opmode_t requestedMode; //user requested mode of operation.
+	private vector_type_t requestedVectorType;
+	private BNO055OffsetData offsets;  // Offsets to write during initialization.
 	
 	//State machine variables
 	private volatile int state = 0;
@@ -348,67 +346,31 @@ public class BNO055 {
 	/**
 	 * Instantiates a new BNO055 class.
 	 *
+	 * @param mode the desired operation mode of the device
+	 * @param vectorType the desired output vector type
+	 */
+	public BNO055(opmode_t mode, vector_type_t vectorType) {
+		this(I2C.Port.kMXP, BNO055_ADDRESS_A, "BNO055", mode, vectorType, new BNO055OffsetData());
+	}
+	
+	/**
+	 * Instantiates a new BNO055 class.
+	 *
 	 * @param port the physical port the sensor is plugged into on the roboRio
 	 * @param address the address the sensor is at (0x28 or 0x29)
+	 * @param nametag a string to identify the BNO055 in logs and the SmartDashboard
+	 * @param mode the desired operation mode of the device
+	 * @param vectorType the desired output vector type
+	 * @param offsetData calibration offsets read from the device previously
 	 */
-	private BNO055(I2C.Port port, byte address, String nametag) {
+	public BNO055(I2C.Port port, byte address, String nametag, opmode_t mode, vector_type_t vectorType, BNO055OffsetData offsetData) {
 		imu = new I2C(port, address);
 		name = nametag;
 		executor = new java.util.Timer();
-		executor.schedule(new BNO055UpdateTask(this), 0L, THREAD_PERIOD);
-	}
-
-	/**
-	 * Get an instance of the IMU object.
-	 * 
-	 * @param mode the operating mode to run the sensor in.
-	 * @param port the physical port the sensor is plugged into on the roboRio
-	 * @param address the address the sensor is at (0x28 or 0x29)
-	 * @return the instantiated BNO055 object
-	 */
-	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType,
-			I2C.Port port, byte address) {
-		if(instance == null) {
-			instance = new BNO055(port, address, "defaultBNO055");
-		}
-		requestedMode = mode;
-		requestedVectorType = vectorType;
-		return instance;
-	}
-
-	/**
-	 * Get an instance of the IMU object. Write calib data during initialization.
-	 * 
-	 * @param mode the operating mode to run the sensor in.
-	 * @param port the physical port the sensor is plugged into on the roboRio
-	 * @param address the address the sensor is at (0x28 or 0x29)
-	 * @param offsetData the offset data from a stored calibration
-	 * @return the instantiated BNO055 object
-	 */
-	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType,
-			I2C.Port port, byte address, BNO055OffsetData offsetData, String nametag) {
-		if(instance == null) {
-			instance = new BNO055(port, address, nametag);
-		}
 		requestedMode = mode;
 		requestedVectorType = vectorType;
 		offsets = offsetData;
-
-		return instance;
-	}
-
-	/**
-	 * Get an instance of the IMU object plugged into the onboard I2C header.
-	 *   Using the default address (0x28)
-	 *  
-	 * @param mode the operating mode to run the sensor in.
-	 * @param vectorType the format the position vector data should be returned
-	 *   in (if you don't know use VECTOR_EULER).
-	 * @return the instantiated BNO055 object
-	 */
-	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType) {
-		return getInstance(mode, vectorType, I2C.Port.kOnboard,
-				BNO055_ADDRESS_A);
+		executor.schedule(new BNO055UpdateTask(this), 0L, THREAD_PERIOD);
 	}
 
 
@@ -416,11 +378,7 @@ public class BNO055 {
 	 * Called periodically. Communicates with the sensor, and checks its state. 
 	 */
 	private void update() {
-		if(!initialized) {
-			if (sensorPresent) {
-				printSystemStatus();
-			}
-			
+		if(!initialized) {			
 			//Step through process of initializing the sensor in a non-
 			//  blocking manner. This sequence of events follows the process
 			//  defined in the original adafruit source as closely as possible.
@@ -460,7 +418,6 @@ public class BNO055 {
 				break;
 			case 4:
 				if (offsets != null) {
-					println("Writing offsets");
 					writeOffsets(offsets);
 				}
 				state++;
@@ -471,6 +428,11 @@ public class BNO055 {
 				state++;
 				break;
 			case 6:
+				//Set operating mode to mode requested at instantiation
+				printSystemStatus();
+				state++;
+				break;
+			case 7:
 				println("initialized.");
 				initialized = true;
 				break;
@@ -943,6 +905,8 @@ public class BNO055 {
 		write16(reg_t.MAG_OFFSET_Y_LSB_ADDR, reg_t.MAG_OFFSET_Y_MSB_ADDR, offsetData.magOffsetY);
 		write16(reg_t.MAG_OFFSET_Z_LSB_ADDR, reg_t.MAG_OFFSET_Z_MSB_ADDR, offsetData.magOffsetZ);
 		write16(reg_t.MAG_RADIUS_LSB_ADDR, reg_t.MAG_RADIUS_MSB_ADDR, offsetData.magRadius);
+		
+		println("calibration offsets written.");
 	}
 
 	public BNO055OffsetData readOffsets() {
@@ -983,6 +947,9 @@ public class BNO055 {
 	}
 
 	// These methods made to simulate pigeon-esque behavior
+	/**
+	 * Get heading of device (yaw while in heading mode)
+	 */
 	public Rotation2d getRotation2d() {
 		// get yaw
 		return Rotation2d.fromDegrees(getHeading() - headingOffset);
@@ -1001,18 +968,21 @@ public class BNO055 {
 
 	public void log() {
 		SmartDashboard.putBoolean(name + " " + "initialized", isInitialized());
-		CalData cal = getCalibration();
-		SmartDashboard.putNumber(name + " " + "gyro calibration", cal.gyro);
-		SmartDashboard.putNumber(name + " " + "accel calibration", cal.accel);
-		SmartDashboard.putNumber(name + " " + "mag calibration", cal.mag);
-		SmartDashboard.putNumber(name + " " + "sys calibration", cal.sys);
-		SystemStatus stat = getSystemStatus();
-		SmartDashboard.putNumber(name + " " + "status", stat.system_status);
-		SmartDashboard.putNumber(name + " " + "self test", stat.self_test_result);
-		SmartDashboard.putNumber(name + " " + "error", stat.system_error);
-		double[] vec = getVector();
-		SmartDashboard.putNumber(name + " " + "X", vec[0]);
-		SmartDashboard.putNumber(name + " " + "Y", vec[1]);
-		SmartDashboard.putNumber(name + " " + "Z", vec[2]);
+		if (isInitialized()) {
+			// Reading this stuff while initializing can be hazardous to the startup process
+			CalData cal = getCalibration();
+			SmartDashboard.putNumber(name + " " + "gyro calibration", cal.gyro);
+			SmartDashboard.putNumber(name + " " + "accel calibration", cal.accel);
+			SmartDashboard.putNumber(name + " " + "mag calibration", cal.mag);
+			SmartDashboard.putNumber(name + " " + "sys calibration", cal.sys);
+			SystemStatus stat = getSystemStatus();
+			SmartDashboard.putNumber(name + " " + "status", stat.system_status);
+			SmartDashboard.putNumber(name + " " + "self test", stat.self_test_result);
+			SmartDashboard.putNumber(name + " " + "error", stat.system_error);
+			double[] vec = getVector();
+			SmartDashboard.putNumber(name + " " + "X", vec[0]);
+			SmartDashboard.putNumber(name + " " + "Y", vec[1]);
+			SmartDashboard.putNumber(name + " " + "Z", vec[2]);
+		}
 	} 
 }

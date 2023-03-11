@@ -72,6 +72,13 @@ public class RobotContainer {
     // CommandScheduler.getInstance().schedule(new PoseArm(m_Arm, m_OpController, m_Claw));
     CommandScheduler.getInstance().schedule(m_PoseArm);
   }
+
+  public void autonomousInit(){
+    if (m_auto != null) {
+      m_auto.getCommand().schedule();
+      
+    }
+  }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link

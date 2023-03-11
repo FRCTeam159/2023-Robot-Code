@@ -33,9 +33,11 @@ public class SwerveModule extends SubsystemBase {
   int cnt = 0;
 
   boolean m_inverted = false;
+  boolean m_optimize = true;
+
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(0.3, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.4, 0, 0);
 
   private final PIDController m_turningPIDController = new PIDController(
       0.3,
@@ -50,7 +52,6 @@ public class SwerveModule extends SubsystemBase {
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
   private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.1, 0.1);
 
-  private int m_motorChannel;
   //Averager m_averager = new Averager(5);
 
   /**
@@ -67,11 +68,9 @@ public class SwerveModule extends SubsystemBase {
       int driveMotorChannel,
       int turningMotorChannel,
       int id) {
-    m_motorChannel = driveMotorChannel;
 
     m_id = id;
 
-    //SmartDashboard.putString("mod" + m_motorChannel, "");
     m_driveMotor = new CANSparkMax(driveMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, CANSparkMaxLowLevel.MotorType.kBrushless);
 
@@ -91,28 +90,32 @@ public class SwerveModule extends SubsystemBase {
     m_turningEncoder.setPositionConversionFactor(kRadiansPerRot); // inches to meters
     m_turningEncoder.setVelocityConversionFactor(kRadiansPerRot / 60); // convert RPM to meters per second
 
-
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     //TODO check example and see if this is there: 
     m_turningPIDController.enableContinuousInput(-Math.PI,Math.PI);
-
   }
 
   public void reset(){
-    //m_averager.reset();
-    //SmartDashboard.putString("mod" + m_motorChannel, " " + m_turningEncoder.getPosition() + " " + heading()); 
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
     System.out.println(name + " reset");
     cnt=0;
   }
+  void setOptimize(boolean t){
+    m_optimize=t;
+  }
+  
   public double heading(){
     return m_turningEncoder.getPosition();
   }
   
   public Rotation2d getRotation2d() {
     return Rotation2d.fromRadians(heading());
+  }
+
+  public void showWheelPosition(){
+    System.out.format("%s %-3.1f\n",name,Math.toDegrees(heading()));
   }
 
   /**
@@ -149,10 +152,9 @@ public class SwerveModule extends SubsystemBase {
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
-    //SwerveModuleState state = desiredState;  // don't optimize
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, getRotation2d());
-    //SwerveModuleState state = desiredState;
-
+    SwerveModuleState state;
+      state= SwerveModuleState.optimize(desiredState, getRotation2d());
+    //System.out.println("optimize = " + m_optimize);
     double velocity=getVelocity();
     // Calculate the drive output from the drive PID controller.
     double driveOutput = m_drivePIDController.calculate(velocity, state.speedMetersPerSecond);
@@ -164,7 +166,8 @@ public class SwerveModule extends SubsystemBase {
     double turnOutput = m_turningPIDController.calculate(turn_angle, state.angle.getRadians());
     double turnFeedforward = 0; //-m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
-    double set_drive=driveOutput+driveFeedforward;
+
+    double set_drive=driveOutput +driveFeedforward;
     double set_turn=turnOutput+turnFeedforward;
 
     //System.out.println(set_drive);
@@ -188,30 +191,27 @@ public class SwerveModule extends SubsystemBase {
     String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
     getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
     SmartDashboard.putString(name, s);
+    
   }
 
-  // public void setOffset(double offset) {
-  //   m_turningEncoder.configMagnetOffset(offset,20);
-  // }
+  public boolean isInverted(){
+    return m_inverted;
+  }
 
   public void setDriveInverted(){
     m_inverted = true;
-    m_driveMotor.setInverted(true);
+  //m_driveMotor.setInverted(true);
   }
   
   public void driveForward(double dist) {
    dist = m_inverted? -dist: dist;
     m_driveMotor.setVoltage(dist);
   }
+  
   public void turnAround(double dist) {
     m_turningMotor.setVoltage(dist);
   }
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  
+ 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

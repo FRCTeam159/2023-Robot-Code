@@ -91,7 +91,6 @@ public class DriveWithGamepad extends CommandBase {
 
     //testLimelight();
     //testClaw();
-    m_led.setData(m_ledBuffer);
 
   }
 
@@ -113,13 +112,13 @@ public class DriveWithGamepad extends CommandBase {
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
-    final var ySpeed = -m_yspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftX(), 0.2)) * kMaxSpeed;
+    final var ySpeed = -m_yspeedLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getLeftX(), 0.2), 3)) * kMaxSpeed;
 
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
-    final var rot = -m_rotLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getRightX(), 0.2), 3))* kMaxAngularSpeed;
+    final var rot = -m_rotLimiter.calculate(Math.pow(MathUtil.applyDeadband(m_controller.getRightX(), 0.2), 5))* kMaxAngularSpeed;
 
     m_drive.drive(xSpeed + 0.001, ySpeed, rot, fieldRelative);
     // m_drive.driveForwardAll(xSpeed);

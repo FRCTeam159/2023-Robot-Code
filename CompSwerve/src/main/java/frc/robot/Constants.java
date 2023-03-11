@@ -26,14 +26,14 @@ public final class Constants {
     public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
     public static final double kMetersPerSecToTalonVelocity = 409.6/kDistPerRot;
 
-    public static final double kMaxSpeed = 4; // 4 meters per second
+    public static final double kMaxSpeed = 10; // 10 meters per second
     public static final double kMaxAngularSpeed = 6 * Math.PI; // 3 rotation per second
     public static final double kMaxAngularAcceleration = 6*Math.PI; // 1 rotations/s/s
     //in degrees, need to be set in degrees
-    public static final double kFrontLeftOffset = -133; //-102
-    public static final double kFrontRightOffset = -107; //-151
-    public static final double kBackLeftOffset = -15; //33
-    public static final double kBackRightOffset = -23; //48
+    public static final double kFrontLeftOffset = -133; 
+    public static final double kFrontRightOffset = 73; //-102
+    public static final double kBackLeftOffset = -15; 
+    public static final double kBackRightOffset = -23; 
 
     public static final double kFrontWheelBase = flagWaffle? 23.22: 18.625; // distance bewteen front wheels (in)
 	public static final double kSideWheelBase = flagWaffle? 23.22: 31;  // distance beteen side wheels (in)

@@ -40,7 +40,7 @@ public class DriveWithGamepad extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_drive.reset();
+    //m_drive.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

@@ -55,7 +55,7 @@ public class Drivetrain extends SubsystemBase {
     m_frontRight.setOffset(kFrontRightOffset);
     m_backLeft.setOffset(kBackLeftOffset);
     m_backRight.setOffset(kBackRightOffset);
-    m_frontRight.setInverted();
+    //m_frontRight.setInverted();
     resetOdometry();
   }
 

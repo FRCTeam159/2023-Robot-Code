@@ -19,6 +19,7 @@ import frc.robot.commands.DrivePath;
 
 public class Autonomous extends SubsystemBase {
   //PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example path", new PathConstraints(4,3));
+  public static boolean autoReset = false;
   Drivetrain m_drive;
   
   /** Creates a new Autonomous. */
@@ -29,11 +30,10 @@ public class Autonomous extends SubsystemBase {
   }
   public SequentialCommandGroup getCommand(){
       
-    return new SequentialCommandGroup(new DriveBack(m_drive, -2.0));
+    return new SequentialCommandGroup(new DriveBack(m_drive, -0.5));
   }
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
   }
 
   // public void driveBack(){

@@ -26,12 +26,30 @@ public class Arm extends Thread{
   public CANSparkMax wrist;
   public RelativeEncoder encoderWrist;
   public SparkMaxLimitSwitch stageOneForwardLimit;
+
+  public double offset1;
+  public double offset2;
+  public double offsetW;
   //TODO tune PID
   public PIDController onePID = new PIDController(20, 0, 0);
-  public PIDController twoPID = new PIDController(20, 0, 0);
-  public PIDController wristPID = new PIDController(6, 0, 0);
+  public PIDController twoPID = new PIDController(15, 0, 0);
+  public PIDController wristPID = new PIDController(3, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
+
+  public enum pos{
+    holding,
+    dropMid,
+    dropHigh,
+    pickupGround,
+    dropHighFw,
+    none
+  };
+
+  public pos currentPos = pos.holding;
+  public pos prevPos = pos.none;
+
+  public double c =0;
 
   /** Creates a new Arm. 
    @param m_Limelight **/
@@ -46,7 +64,7 @@ public class Arm extends Thread{
     encoderWrist = wrist.getEncoder();
     encoderWrist.setPositionConversionFactor(kEncoderWristPosConversionFactor);
 
-    onePID.setTolerance(0.1);
+    onePID.setTolerance(1);
     twoPID.setTolerance(1);
     wristPID.setTolerance(1);
 
@@ -56,8 +74,6 @@ public class Arm extends Thread{
     encoderOne.setPosition(0);
     encoderTwo.setPosition(0);
     encoderWrist.setPosition(0);
-
-    stageOneForwardLimit = stageOne.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   }
 
   public double getStageOneAngle() {
@@ -68,11 +84,11 @@ public class Arm extends Thread{
   public double getStageTwoAngle() {
     // return the absolute (robot-relative) angle of the first stage
     //System.out.println(encoderTwo.getPositionConversionFactor());
-    return -encoderTwo.getPosition()+0.5;
+    return -encoderTwo.getPosition()+0.5;//offset2;
   }
 
   public double getWristAngle(){
-    return encoderWrist.getPosition()+0.5;
+    return -encoderWrist.getPosition()+0.5;
   }
 
   public void setStageOneZero() {
@@ -87,22 +103,25 @@ public class Arm extends Thread{
   public void setAngle(ArmPosition pos) {
     double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
     double twoOut = twoPID.calculate(getStageTwoAngle(), pos.twoAngle/(2*Math.PI));
-    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI));
-    stageOne.set(oneOut);
-    stageTwo.set(-twoOut);
-    wrist.set(wristOut);
-    //System.out.println(oneOut);
+    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI)-0.042);
+    //TODO RENENABLE
+    // stageOne.set(oneOut);
+    // stageTwo.set(-twoOut);
+    // wrist.set(-wristOut);
   }
 
   public boolean armAtSetPoint(){
-    return onePID.atSetpoint() && twoPID.atSetpoint() && wristPID.atSetpoint();
+    double error1 = Math.abs(onePID.getSetpoint()-getStageOneAngle());
+    double error2 = Math.abs(twoPID.getSetpoint()-getStageTwoAngle());
+    double errorW = 0;//Math.abs(wristPID.getSetpoint()-getWristAngle());
+    return (error1 < 0.1 && error2 <0.1 && errorW < 0.1);
   }
 
   private void runFeed(){
-      setAngle(targetFeeder.get(0));
+      setAngle(targetFeeder.get(targetFeeder.size()-1));
       //System.out.println("going to: " + targetFeeder.get(0));
       if(armAtSetPoint() && targetFeeder.size() > 1){
-        targetFeeder.remove(0);
+        targetFeeder.remove(targetFeeder.size()-1);
         System.out.println("popping feed");
       }
   }
@@ -134,14 +153,47 @@ public class Arm extends Thread{
 
   // holding position
   public void posHolding(){
+    prevPos = currentPos;
+    currentPos = pos.holding;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
+    if(prevPos == pos.dropHigh || prevPos == pos.dropMid || prevPos == pos.dropHighFw){
+      targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
+      targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
+    } else {
+      targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
+    }
+    
     System.out.println("pos is holding");
   }
 
-  public void posSetpoint1(){
+  public void posPickupGround(){
+    prevPos = currentPos;
+    currentPos = pos.pickupGround;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(1, 1, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.07, 1, ArmPosition.consType.pose));
+  }
+
+  public void posDropMid(){
+    prevPos = currentPos;
+    currentPos = pos.dropMid;
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(1.1, 1, ArmPosition.consType.pose));
+  }
+
+  public void posDropHigh(){
+    prevPos = currentPos;
+    currentPos = pos.dropHigh;
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(0.747, Math.PI, Math.PI));
+    targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
+  }
+
+  public void posDropHighFw(){
+    prevPos = currentPos;
+    currentPos = pos.dropHighFw;
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(0.857, Math.PI, Math.PI/4));
+    targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
   }
 
   public void posTrim(double r){
@@ -154,10 +206,17 @@ public class Arm extends Thread{
   //pos code end
 
   public void log() {
+    c++;
     String s = targetFeeder.size() > 0?String.format("alpha: %-3.2f beta: %-3.2f wrist: %-3.2f", targetFeeder.get(0).oneAngle/(2*Math.PI), targetFeeder.get(0).twoAngle/(2*Math.PI), targetFeeder.get(0).wristAngle/(2*Math.PI)): "no things";
     SmartDashboard.putString("simulationtest", s);
     String t = String.format("encoder one: %-3.2f encoder two: %-3.2f encoder wrist: %-3.2f", getStageOneAngle(), getStageTwoAngle(), getWristAngle());
     SmartDashboard.putString("encoders", t);
+    if(c%100 == 0){
+      // System.out.println("AT SET POINT: "+ armAtSetPoint());
+      // System.out.println("FIRST STAGE: " + onePID.atSetpoint());
+      // System.out.println("SETPOINT ONE: " + onePID.getSetpoint());
+      // System.out.println();
+    }
   }
 
   public void run(){

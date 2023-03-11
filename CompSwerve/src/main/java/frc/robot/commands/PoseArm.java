@@ -41,6 +41,7 @@ public class PoseArm extends CommandBase {
     armController1 = 0;
     //addRequirements(arm, claw);
     //SmartDashboard.putNumber("joystick", -2);
+    SmartDashboard.putString("offsets", "default");
   }
 
   // Called when the command is initially scheduled.
@@ -53,25 +54,25 @@ public class PoseArm extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double up = m_Controller.getRightTriggerAxis();
-    double down = m_Controller.getLeftTriggerAxis();
+    // double up = m_Controller.getRightTriggerAxis();
+    // double down = m_Controller.getLeftTriggerAxis();
     //m_Arm.stageOne.set(up - down);
     //m_Arm.stageTwo.set(m_Controller.getLeftX());
     //System.out.println(m_Controller.getLeftX());
 
-    if(m_Controller.getPOV() == 0){
-      armController1 = armController1 + 0.01;
-    }
-    if(m_Controller.getPOV() == 180){
-      armController1 = armController1 - 0.01;
-    }
+    // if(m_Controller.getPOV() == 0){
+    //   armController1 = armController1 + 0.01;
+    // }
+    // if(m_Controller.getPOV() == 180){
+    //   armController1 = armController1 - 0.01;
+    // }
 
-    if(m_Controller.getPOV() == 90){
-      armController2= armController2 + 0.01;
-    }
-    if(m_Controller.getPOV() == 270){
-      armController2= armController2 - 0.01;
-    }
+    // if(m_Controller.getPOV() == 90){
+    //   armController2= armController2 + 0.01;
+    // }
+    // if(m_Controller.getPOV() == 270){
+    //   armController2= armController2 - 0.01;
+    // }
     
     //m_Arm.armPIDtest(armController1);
     //m_Arm.armPIDtesttwo(armController2);
@@ -79,24 +80,37 @@ public class PoseArm extends CommandBase {
     m_Arm.log(); 
     m_Claw.clawControl();
     if(m_Controller.getYButtonPressed()){
-      m_Arm.posSetpoint1();
+      m_Arm.posPickupGround();
       System.out.println("y pressed");
     }
     if(m_Controller.getBButtonPressed()){
       m_Arm.posHolding();
       System.out.println("b pressed");
     }
+    if(m_Controller.getXButtonPressed()){
+      m_Arm.posDropHigh();
+      System.out.println("x pressed");
+    }
+    if(m_Controller.getAButtonPressed()){
+      m_Arm.posDropMid();
+      System.out.println("a pressed");
+    }
     
+    SmartDashboard.putString("offsets", "two: " + stageTwoOffset + " wrist: " + wristOffset);
   }
 
 
   public void setArmOffsets(BNO055 elbow, BNO055 wrist){
-    double theta = Math.atan(elbow.getVector()[2]/elbow.getVector()[0]);
-    stageTwoOffset = -theta/(2*Math.PI);
-    System.out.println("one offset: " + theta/(2*Math.PI));
-    theta = Math.atan(wrist.getVector()[2]/wrist.getVector()[0]);
-    stageTwoOffset = -theta/(2*Math.PI);
-    System.out.println("wrist offset: " + theta/(2*Math.PI));
+    double theta = Math.atan(elbow.getVector()[1]/elbow.getVector()[0]);
+    System.out.println("y: " + elbow.getVector()[1]+"x: " + elbow.getVector()[0]);
+    stageTwoOffset = theta/(2*Math.PI);
+    m_Arm.offset1 = stageTwoOffset;
+    System.out.println("two offset: " + theta/(2*Math.PI));
+    double tau = Math.atan(wrist.getVector()[2]/wrist.getVector()[0]);
+    System.out.println("z: " + wrist.getVector()[1]+"x: " + wrist.getVector()[0]);
+    wristOffset = tau/(2*Math.PI);
+    m_Arm.offsetW = wristOffset;
+    System.out.println("wrist offset: " + tau/(2*Math.PI));
   }
   
 
