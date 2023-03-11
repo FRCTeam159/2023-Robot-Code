@@ -48,7 +48,7 @@ public class RobotContainer {
   private final Claw m_Claw = new Claw(m_OpController);
 
   //commands
-  private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller);
+  private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller, m_Claw);
   final PoseArm m_PoseArm = new PoseArm(m_Arm, m_OpController, m_Claw);
   //private final DriveToAprilTag m_ToAprilTag = new DriveToAprilTag(m_Limelight, m_TargetMgr, m_Drivetrain);
 

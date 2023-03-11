@@ -12,6 +12,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.Claw;
 
 import static frc.robot.Constants.*;
 import frc.robot.subsystems.Limelight;
@@ -29,15 +30,16 @@ public class DriveWithGamepad extends CommandBase {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
   public AddressableLED m_led;
   public AddressableLEDBuffer m_ledBuffer;
-
+  public Claw m_Claw;
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveWithGamepad(Drivetrain drive, XboxController controller) {
+  public DriveWithGamepad(Drivetrain drive, XboxController controller, Claw claw) {
     m_drive = drive;
     m_controller = controller;
+    m_Claw = claw;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
   }
@@ -59,15 +61,34 @@ public class DriveWithGamepad extends CommandBase {
   public void execute() {
     ledSetter();
     driveWithJoystick(true);
-    if (ledSetter()) {
+    if (ledSetter()) 
+    {
       for (var i = 0; i<m_ledBuffer.getLength(); i++) {
         m_ledBuffer.setRGB(i, 255,0,0);
       } 
-    } else {
-      for (var i = 0; i<m_ledBuffer.getLength(); i++) {
+    } 
+    else 
+    {
+      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+      {
         m_ledBuffer.setRGB(i, 0,255,0);
       }
     }
+    if (m_Claw.clawState == 2 || m_Claw.clawState == 1)
+    {
+      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+      {
+        m_ledBuffer.setRGB(i, 255,0,255);
+      }
+    }
+    if (m_Claw.clawState == 3 || m_Claw.clawState == 4)
+    {
+      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+      {
+        m_ledBuffer.setRGB(i, 255,255,0);
+      }
+    }
+
     //testLimelight();
     //testClaw();
 
