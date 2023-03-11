@@ -29,6 +29,7 @@ public class Claw extends SubsystemBase {
   public RelativeEncoder m_encoderRight;
   public static CANSparkMax m_clawMotor1;
   public static CANSparkMax m_clawMotor2;
+  public double clawState;
 
   XboxController m_Controller;
 
@@ -61,20 +62,26 @@ public class Claw extends SubsystemBase {
     if(state == 0){
       m_clawMotor1.set(0);
       m_clawMotor2.set(0);
+      clawState = 0;
     } else if(state == 1){
       m_clawMotor1.set(-.3); // big suck
       m_clawMotor2.set(-.3);
+      clawState = 1;
     } else if(state == 2){
       m_clawMotor1.set(-0.02); //small suck
       m_clawMotor2.set(-0.02);
+      clawState = 2;
     } else if(state == 3){
       m_clawMotor1.set(1); //big throw
       m_clawMotor2.set(1);
+      clawState = 3;
     } else if(state == 4){
       m_clawMotor1.set(0.25);
       m_clawMotor2.set(0.25);
+      clawState = 4;
     }
   }
+
 
   public void clawSolenoidState(boolean grab) {
     if (grab) {

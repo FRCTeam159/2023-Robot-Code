@@ -6,14 +6,15 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.Claw;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public final class Autos {
   /** Example static factory for an autonomous command. */
   //TODO tacky fix for autos remove when actual code is here
-  public static CommandBase exampleAuto(Drivetrain subsystem, XboxController m_Controller) {
-    return Commands.sequence(subsystem.exampleMethodCommand(), new DriveWithGamepad(subsystem, m_Controller));
+  public static CommandBase exampleAuto(Drivetrain subsystem, XboxController m_Controller, Claw m_Claw) {
+    return Commands.sequence(subsystem.exampleMethodCommand(), new DriveWithGamepad(subsystem, m_Controller, m_Claw));
   }
 
   private Autos() {
