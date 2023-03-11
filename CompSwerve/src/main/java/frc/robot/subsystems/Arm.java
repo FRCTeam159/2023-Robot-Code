@@ -33,7 +33,7 @@ public class Arm extends Thread{
   //TODO tune PID
   public PIDController onePID = new PIDController(20, 0, 0);
   public PIDController twoPID = new PIDController(15, 0, 0);
-  public PIDController wristPID = new PIDController(3, 0, 0);
+  public PIDController wristPID = new PIDController(6, 0, 0);
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
 
@@ -103,11 +103,11 @@ public class Arm extends Thread{
   public void setAngle(ArmPosition pos) {
     double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
     double twoOut = twoPID.calculate(getStageTwoAngle(), pos.twoAngle/(2*Math.PI));
-    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI)-0.042);
+    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI)-0);
     //TODO RENENABLE
-    // stageOne.set(oneOut);
-    // stageTwo.set(-twoOut);
-    // wrist.set(-wristOut);
+    stageOne.set(oneOut);
+    stageTwo.set(-twoOut);
+    wrist.set(-wristOut);
   }
 
   public boolean armAtSetPoint(){

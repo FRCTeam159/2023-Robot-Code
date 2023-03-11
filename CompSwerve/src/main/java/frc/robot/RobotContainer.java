@@ -74,10 +74,11 @@ public class RobotContainer {
   }
 
   public void autonomousInit(){
-    if (m_auto != null) {
-      m_auto.getCommand().schedule();
+    m_auto.getCommand().schedule();
+    // if (m_auto != null) {
+    //   m_auto.getCommand().schedule();
       
-    }
+    // }
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be created by

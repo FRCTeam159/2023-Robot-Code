@@ -177,7 +177,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public double getRotations() {
-    return (getEncoderPosition()/kFalconResolution);
+    return (getEncoderPosition()/kFalconResolution)/kDriveGearRatio;
   }
 
   public void setVelocity(double v) {
@@ -229,7 +229,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void log() {
-    String s = String.format("Drive:%-1.2f m Rotations:%-1.2f Angle:%-4.1f Abs:%-4.1f deg, Absdeg:%-4.1f\n", 
+    String s = String.format("Drive:%-2.2f m Rotations:%-1.2f Angle:%-4.1f Abs:%-4.1f deg, Absdeg:%-4.1f\n", 
     getDistance(), getRotations(), getRotation2d().getDegrees(), Math.toDegrees(cummulativeAngle()), Math.toDegrees(heading()));
     SmartDashboard.putString(name, s);
     //if(name.equals("FL"))

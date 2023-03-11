@@ -17,12 +17,12 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
     static public final boolean flagWaffle = false;
 
-    static public final double kDriveGearRatio=6.75;  // MK4i drive (standard)
+    static public final double kDriveGearRatio=8.14;  // MK4i drive (standard)
     static public final double kTurnGearRatio=21.429; // MK4i turn (all)
   
     public static final double kWheelRadius = 2;
     public static final int kEncoderResolution = 4096;
-    public static final int kFalconResolution = 2048*10;
+    public static final int kFalconResolution = 2048;
     public static final double kDistPerRot = Units.inchesToMeters(kWheelRadius * Math.PI * 2)/kDriveGearRatio;
     public static final double kMetersPerSecToTalonVelocity = 409.6/kDistPerRot;
 
