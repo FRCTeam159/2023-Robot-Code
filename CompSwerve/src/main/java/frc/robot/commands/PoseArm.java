@@ -91,6 +91,10 @@ public class PoseArm extends CommandBase {
       m_Arm.posDropHigh();
       System.out.println("x pressed");
     }
+    if(m_Controller.getAButtonPressed()){
+      m_Arm.posDropMid();
+      System.out.println("a pressed");
+    }
     
     SmartDashboard.putString("offsets", "two: " + stageTwoOffset + " wrist: " + wristOffset);
   }

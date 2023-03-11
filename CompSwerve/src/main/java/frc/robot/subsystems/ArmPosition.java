@@ -21,15 +21,14 @@ public class ArmPosition extends SubsystemBase {
   public double twoAngle;
   public double wristAngle;
   public boolean hasWrist;
-  public boolean isOvershot;
   double distance;
   
 //Y AND X ARE SWAPPED
 
   /** Creates a new ArmPosition. */
   public ArmPosition(double one, double two, consType m) {
-    distance = Math.max(kMinRadius, Math.min(Math.sqrt(one*one + two*two), kMaxRadius));
-    isOvershot = distance == kMinRadius || distance == kMaxRadius? true: false;
+    distance = Math.sqrt(one*one + two*two);
+
     if(m == consType.pose){
       xPos = one;
       yPos = two;
@@ -47,6 +46,12 @@ public class ArmPosition extends SubsystemBase {
     }
     wristAngle = oneAngle + twoAngle;
     hasWrist = false;
+
+    if(Double.isNaN(oneAngle)||Double.isNaN(twoAngle)){
+      oneAngle = Math.PI/2;
+      twoAngle = Math.PI/2;
+      wristAngle = Math.PI;
+    }
   }
 
   public ArmPosition(double one, double two, double wrist){

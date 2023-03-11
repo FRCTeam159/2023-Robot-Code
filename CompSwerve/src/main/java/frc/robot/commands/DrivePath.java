@@ -14,6 +14,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -85,10 +86,10 @@ public class DrivePath extends CommandBase {
 
   Trajectory pathPlannerTest() {
     try {
-      PathPlannerTrajectory trajectory = PathPlanner.loadPath("Example path", 
+      PathPlannerTrajectory trajectory = PathPlanner.loadPath("Center", 
         new PathConstraints(Drivetrain.kMaxVelocity,Drivetrain.kMaxAcceleration)); // max vel & accel
     
-      Pose2d p0 = trajectory.getInitialPose();
+      Pose2d p0 = trajectory.getInitialHolonomicPose();
 
       // Pathplanner sets 0,0 as the lower left hand corner (FRC field coord system) 
       // for Gazebo, need to subtract intitial pose from each state so that 0,0 is 
@@ -96,9 +97,15 @@ public class DrivePath extends CommandBase {
 
       List<State> states = trajectory.getStates();
       for(int i=0;i<states.size();i++){
-        State state=states.get(i);
-        Pose2d psi=state.poseMeters.relativeTo(p0);
-        state.poseMeters=psi;
+        PathPlannerTrajectory.PathPlannerState state=trajectory.getState(i);
+        Pose2d pr=state.poseMeters.relativeTo(p0);
+        Rotation2d h = state.holonomicRotation;
+        state.poseMeters=pr;
+        if (i ==0){
+          pr = new Pose2d(pr.getTranslation(), new Rotation2d());
+          state.holonomicRotation = h.plus(new Rotation2d(Math.toRadians(180)));
+        }
+        state.poseMeters=pr;
       }
       return trajectory;
     } catch (Exception ex) {
@@ -124,7 +131,7 @@ public class DrivePath extends CommandBase {
     ChassisSpeeds speeds = m_ppcontroller.calculate(m_drive.getPose(), (PathPlannerState) reference);
       m_drive.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
   
-
+    //System.out.println(m_drive.getPose().toString());
   }
 
     // =================================================
