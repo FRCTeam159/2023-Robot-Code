@@ -47,47 +47,47 @@ public class DriveWithGamepad extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_drive.reset();
-    m_led = new AddressableLED(9);
-    m_ledBuffer = new AddressableLEDBuffer(60);
-    m_led.setLength(m_ledBuffer.getLength());
-    m_led.setData(m_ledBuffer);
-    m_led.start();
+    //m_drive.reset();
+    // m_led = new AddressableLED(9);
+    // m_ledBuffer = new AddressableLEDBuffer(60);
+    // m_led.setLength(m_ledBuffer.getLength());
+    // m_led.setData(m_ledBuffer);
+    // m_led.start();
 
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    ledSetter();
+    //ledSetter();
     driveWithJoystick(true);
-    if (ledSetter()) 
-    {
-      for (var i = 0; i<m_ledBuffer.getLength(); i++) {
-        m_ledBuffer.setRGB(i, 255,0,0);
-      } 
-    } 
-    else 
-    {
-      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
-      {
-        m_ledBuffer.setRGB(i, 0,255,0);
-      }
-    }
-    if (m_Claw.clawState == 2 || m_Claw.clawState == 1)
-    {
-      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
-      {
-        m_ledBuffer.setRGB(i, 255,0,255);
-      }
-    }
-    if (m_Claw.clawState == 3 || m_Claw.clawState == 4)
-    {
-      for (var i = 0; i<m_ledBuffer.getLength(); i++) 
-      {
-        m_ledBuffer.setRGB(i, 255,255,0);
-      }
-    }
+    // if (ledSetter()) 
+    // {
+    //   for (var i = 0; i<m_ledBuffer.getLength(); i++) {
+    //     m_ledBuffer.setRGB(i, 255,0,0);
+    //   } 
+    // } 
+    // else 
+    // {
+    //   for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+    //   {
+    //     m_ledBuffer.setRGB(i, 0,255,0);
+    //   }
+    // }
+    // if (m_Claw.clawState == 2 || m_Claw.clawState == 1)
+    // {
+    //   for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+    //   {
+    //     m_ledBuffer.setRGB(i, 255,0,255);
+    //   }
+    // }
+    // if (m_Claw.clawState == 3 || m_Claw.clawState == 4)
+    // {
+    //   for (var i = 0; i<m_ledBuffer.getLength(); i++) 
+    //   {
+    //     m_ledBuffer.setRGB(i, 255,255,0);
+    //   }
+    // }
 
     //testLimelight();
     //testClaw();

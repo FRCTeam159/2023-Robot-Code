@@ -6,9 +6,13 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ArmPosition.consType;
+
 import static frc.robot.Constants.*;
 
 import java.util.ArrayList;
@@ -31,9 +35,9 @@ public class Arm extends Thread{
   public double offset2;
   public double offsetW;
   //TODO tune PID
-  public PIDController onePID = new PIDController(20, 0, 0);
-  public PIDController twoPID = new PIDController(15, 0, 0);
-  public PIDController wristPID = new PIDController(6, 0, 0);
+  public ProfiledPIDController onePID = new ProfiledPIDController(15, 0, 0, new Constraints(Math.PI, Math.PI/2));
+  public ProfiledPIDController twoPID = new ProfiledPIDController(15, 0, 0, new Constraints(Math.PI, Math.PI/2));
+  public ProfiledPIDController wristPID = new ProfiledPIDController(6, 0, 0, new Constraints(Math.PI, Math.PI/2));
 
   public ArrayList<ArmPosition> targetFeeder = new ArrayList<ArmPosition>(10);
 
@@ -64,9 +68,9 @@ public class Arm extends Thread{
     encoderWrist = wrist.getEncoder();
     encoderWrist.setPositionConversionFactor(kEncoderWristPosConversionFactor);
 
-    onePID.setTolerance(1);
-    twoPID.setTolerance(1);
-    wristPID.setTolerance(1);
+    onePID.setTolerance(0.05);
+    twoPID.setTolerance(0.05);
+    wristPID.setTolerance(0.05);
 
     SmartDashboard.putString("simulationtest", "default");
     SmartDashboard.putString("encoders", "default");
@@ -78,13 +82,13 @@ public class Arm extends Thread{
 
   public double getStageOneAngle() {
     // return the absolute (robot-relative) angle of the first stage
-    return encoderOne.getPosition()+0.25;
+    return encoderOne.getPosition()+0.29;
   }
 
   public double getStageTwoAngle() {
     // return the absolute (robot-relative) angle of the first stage
     //System.out.println(encoderTwo.getPositionConversionFactor());
-    return -encoderTwo.getPosition()+0.5;//offset2;
+    return -encoderTwo.getPosition()+0.08;//offset2;
   }
 
   public double getWristAngle(){
@@ -103,7 +107,7 @@ public class Arm extends Thread{
   public void setAngle(ArmPosition pos) {
     double oneOut = onePID.calculate(getStageOneAngle(), pos.oneAngle/(2*Math.PI));
     double twoOut = twoPID.calculate(getStageTwoAngle(), pos.twoAngle/(2*Math.PI));
-    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI)-0);
+    double wristOut = wristPID.calculate(getWristAngle(), pos.wristAngle/(2*Math.PI));
     //TODO RENENABLE
     stageOne.set(oneOut);
     stageTwo.set(-twoOut);
@@ -111,10 +115,13 @@ public class Arm extends Thread{
   }
 
   public boolean armAtSetPoint(){
-    double error1 = Math.abs(onePID.getSetpoint()-getStageOneAngle());
-    double error2 = Math.abs(twoPID.getSetpoint()-getStageTwoAngle());
-    double errorW = 0;//Math.abs(wristPID.getSetpoint()-getWristAngle());
-    return (error1 < 0.1 && error2 <0.1 && errorW < 0.1);
+    double error1 = Math.abs((targetFeeder.get(targetFeeder.size()-1).oneAngle/(2*Math.PI))-getStageOneAngle());
+    double error2 = Math.abs((targetFeeder.get(targetFeeder.size()-1).twoAngle/(2*Math.PI))-getStageTwoAngle());
+    double errorW = Math.abs((targetFeeder.get(targetFeeder.size()-1).wristAngle/(2*Math.PI))-getWristAngle()); 
+    String s = String.format("err1: %-1.3f err2: %-1.3f stpt1: %-3.3f stpt2: %-3.3f ang1: %-3.3f ang2: %3.3f", 
+    error1, error2, onePID.getSetpoint().position, twoPID.getSetpoint().position, getStageOneAngle(), getStageTwoAngle());
+    System.out.println(s);
+    return (error1 < 0.02 && error2 <0.02 && errorW < 0.02);
   }
 
   private void runFeed(){
@@ -157,10 +164,10 @@ public class Arm extends Thread{
     currentPos = pos.holding;
     targetFeeder.clear();
     if(prevPos == pos.dropHigh || prevPos == pos.dropMid || prevPos == pos.dropHighFw){
-      targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
-      targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
+      targetFeeder.add(new ArmPosition(0.4, 0.4, consType.pose));
+      targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
     } else {
-      targetFeeder.add(new ArmPosition(0.4, 0.5, ArmPosition.consType.pose));
+      targetFeeder.add(new ArmPosition(0.4, 0.4, consType.pose));
     }
     
     System.out.println("pos is holding");
@@ -170,35 +177,36 @@ public class Arm extends Thread{
     prevPos = currentPos;
     currentPos = pos.pickupGround;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.07, 1, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.07, 1, consType.pose));
   }
 
   public void posDropMid(){
     prevPos = currentPos;
     currentPos = pos.dropMid;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(1.1, 1, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(1.1, 1, consType.pose));
+    targetFeeder.add(new ArmPosition(0.75, 0.5, 0.27, consType.pose));
   }
 
   public void posDropHigh(){
     prevPos = currentPos;
     currentPos = pos.dropHigh;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.747, Math.PI, Math.PI));
-    targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.747, Math.PI, Math.PI, consType.angle));
+    targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
   }
 
   public void posDropHighFw(){
     prevPos = currentPos;
     currentPos = pos.dropHighFw;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(0.857, Math.PI, Math.PI/4));
-    targetFeeder.add(new ArmPosition(1.5, 0.4, ArmPosition.consType.pose));
+    targetFeeder.add(new ArmPosition(0.857, Math.PI, Math.PI/4, consType.angle));
+    targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
   }
 
   public void posTrim(double r){
     targetFeeder.clear();
-    ArmPosition pos = new ArmPosition(getStageOneAngle(), encoderTwo.getPosition(), encoderWrist.getPosition());
+    ArmPosition pos = new ArmPosition(getStageOneAngle(), encoderTwo.getPosition(), encoderWrist.getPosition(), consType.angle);
     System.out.println("trimming");
     targetFeeder.set(0, new ArmPosition(pos.xPos + Math.cos(r), pos.yPos + Math.sin(r), ArmPosition.consType.pose));
   }

@@ -54,14 +54,32 @@ public class ArmPosition extends SubsystemBase {
     }
   }
 
-  public ArmPosition(double one, double two, double wrist){
-    oneAngle = one;
-    twoAngle = two;
-    double[] temp = calculatePos(one, two);
-    xPos = temp[0];
-    yPos = temp[1];
+  public ArmPosition(double one, double two, double wrist, consType m){
+    distance = Math.sqrt(one*one + two*two);
+
+    if(m == consType.pose){
+      xPos = one;
+      yPos = two;
+      System.out.println("one = " + one + "two = " + two);
+      double[] temp = calculateAngle(xPos, yPos);
+      oneAngle = temp[0];
+      twoAngle = temp[1];
+    }
+    if(m == consType.angle){
+      oneAngle = one;
+      twoAngle = two;
+      double[] temp = calculatePos(oneAngle, twoAngle);
+      xPos = temp[0];
+      yPos = temp[1];
+    }
     wristAngle = wrist;
     hasWrist = true;
+    
+    if(Double.isNaN(oneAngle)||Double.isNaN(twoAngle)){
+      oneAngle = Math.PI/2;
+      twoAngle = Math.PI/2;
+      wristAngle = Math.PI;
+    }
   }
 
   public double[] calculateAngle(double x, double y) {
