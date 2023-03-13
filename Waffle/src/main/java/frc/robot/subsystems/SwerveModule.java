@@ -198,13 +198,13 @@ public class SwerveModule extends SubsystemBase {
     return m_inverted;
   }
 
-  public void setDriveInverted(){
-    m_inverted = true;
-  //m_driveMotor.setInverted(true);
+  public void setDriveInverted(boolean b){
+    m_inverted = b;
+  m_driveMotor.setInverted(b);
   }
   
   public void driveForward(double dist) {
-   dist = m_inverted? -dist: dist;
+   //dist = m_inverted? -dist: dist;
     m_driveMotor.setVoltage(dist);
   }
   

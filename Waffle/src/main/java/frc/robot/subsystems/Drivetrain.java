@@ -41,7 +41,10 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveModule m_backRight = new SwerveModule(kBr_Drive, kBr_Turn,3);
   private final SwerveModule m_backLeft = new SwerveModule(kBl_Drive, kBl_Turn, 4);
 
-  private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backRight,m_backLeft};
+  public static boolean m_field_oriented=true;
+
+  //private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backRight,m_backLeft};
+  private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backLeft,m_backRight};
 
   private final Field2d m_Field2d = new Field2d();
   Timer m_timer = new Timer();
@@ -57,13 +60,15 @@ public class Drivetrain extends SubsystemBase {
 
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
-    SmartDashboard.putBoolean("optimize", m_optimize);
+    SmartDashboard.putBoolean("Field Oriented" , m_field_oriented);
+    //SmartDashboard.putBoolean("optimize", m_optimize);
     m_gyro.reset();
 
-    //m_frontLeft.setDriveInverted();
-    //m_backLeft.setDriveInverted();
-    m_frontRight.setDriveInverted();
-    m_backRight.setDriveInverted();
+    m_frontLeft.setDriveInverted(false);
+    m_backLeft.setDriveInverted(false);
+
+   m_frontRight.setDriveInverted(true);
+   m_backRight.setDriveInverted(true);
 
     resetOdometry();
   }
@@ -134,15 +139,19 @@ public class Drivetrain extends SubsystemBase {
    
     updateOdometry();
   }
-
+  public static boolean isFieldOriented(){
+    return m_field_oriented;
+  }
   public void log() {
     SmartDashboard.putNumber("Gyro", getHeading());
     Pose2d pose=getPose();
     String s=String.format("X:%-2.1f Y:%-2.1f H:%-2.1f",
     pose.getX(),pose.getY(),pose.getRotation().getDegrees());
     SmartDashboard.putString("Pose", s);
+
+    m_field_oriented=SmartDashboard.getBoolean("Field Oriented" , m_field_oriented);
     
-    SmartDashboard.putBoolean("optimize", m_optimize);
+    //SmartDashboard.putBoolean("optimize", m_optimize);
   }
      
   /** Updates the field relative position of the robot. */

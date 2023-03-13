@@ -1010,7 +1010,7 @@ public class BNO055 implements Gyro{
 
 	@Override
 	public double getAngle() {
-		return getHeading();
+		return -getHeading();
 	}
 
 	@Override

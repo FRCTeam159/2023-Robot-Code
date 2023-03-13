@@ -18,7 +18,8 @@ public class DriveBack extends CommandBase {
   int count = 0;
   /** Creates a new DriveBack. 
    * @param i
-   * @param m_drive */
+   * @param m_drive 
+   * */
   public DriveBack(Drivetrain drive, double i) {
     m_drive = drive;
     m_target = i;
@@ -38,7 +39,7 @@ public class DriveBack extends CommandBase {
   public void execute() {
     Pose2d pose = m_drive.getPose();
     double x = pose.getX();
-    double error = -m_xController.calculate(x, m_target) * kMaxSpeed;
+    double error = m_xController.calculate(x, m_target) * kMaxSpeed;
     if((count % 10) == 0)
     System.out.format("x: %-1.2f target: %-1.2f correction: %-1.2f\n", x, m_target, error);
     count++;
