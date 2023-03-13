@@ -88,11 +88,12 @@ public class PoseArm extends CommandBase {
       System.out.println("b pressed");
     }
     if(m_Controller.getXButtonPressed()){
-      m_Arm.posDropHigh();
+      m_Arm.posDropHighCone();
       System.out.println("x pressed");
     }
     if(m_Controller.getAButtonPressed()){
-      m_Arm.posDropMid();
+      //m_Arm.posAuto();
+      m_Arm.posDropHighCube();
       System.out.println("a pressed");
     }
     

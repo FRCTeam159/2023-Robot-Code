@@ -37,7 +37,7 @@ public class RobotContainer {
   private final XboxController m_OpController = new XboxController(1);
   //Subsystems
   private final Drivetrain m_Drivetrain = new Drivetrain();
-  private final Autonomous m_auto = new Autonomous(m_Drivetrain);
+  
 
   //private final Camera m_Camera = new Camera();
   //private final TargetMgr m_TargetMgr = new TargetMgr();
@@ -46,6 +46,8 @@ public class RobotContainer {
 
   private final Arm m_Arm = new Arm();
   private final Claw m_Claw = new Claw(m_OpController);
+
+  private final Autonomous m_auto = new Autonomous(m_Drivetrain, m_Arm, m_Claw);
 
   //commands
   private final DriveWithGamepad m_Gamepad = new DriveWithGamepad(m_Drivetrain, m_Controller, m_Claw);

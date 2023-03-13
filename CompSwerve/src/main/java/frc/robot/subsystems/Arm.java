@@ -43,8 +43,8 @@ public class Arm extends Thread{
 
   public enum pos{
     holding,
-    dropMid,
-    dropHigh,
+    dropHighCube,
+    dropHighCone,
     pickupGround,
     dropHighFw,
     none
@@ -120,7 +120,7 @@ public class Arm extends Thread{
     double errorW = Math.abs((targetFeeder.get(targetFeeder.size()-1).wristAngle/(2*Math.PI))-getWristAngle()); 
     String s = String.format("err1: %-1.3f err2: %-1.3f stpt1: %-3.3f stpt2: %-3.3f ang1: %-3.3f ang2: %3.3f", 
     error1, error2, onePID.getSetpoint().position, twoPID.getSetpoint().position, getStageOneAngle(), getStageTwoAngle());
-    System.out.println(s);
+    //System.out.println(s);
     return (error1 < 0.02 && error2 <0.02 && errorW < 0.02);
   }
 
@@ -163,9 +163,10 @@ public class Arm extends Thread{
     prevPos = currentPos;
     currentPos = pos.holding;
     targetFeeder.clear();
-    if(prevPos == pos.dropHigh || prevPos == pos.dropMid || prevPos == pos.dropHighFw){
+    if(prevPos == pos.dropHighCone || prevPos == pos.dropHighFw || prevPos == pos.dropHighCube){
       targetFeeder.add(new ArmPosition(0.4, 0.4, consType.pose));
-      targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
+      targetFeeder.add(new ArmPosition(0.4, 0.3, 7*Math.PI/10, consType.pose));
+      targetFeeder.add(new ArmPosition(1.5, 0.3, 2*Math.PI/3, consType.pose));
     } else {
       targetFeeder.add(new ArmPosition(0.4, 0.4, consType.pose));
     }
@@ -180,17 +181,18 @@ public class Arm extends Thread{
     targetFeeder.add(new ArmPosition(0.07, 1, consType.pose));
   }
 
-  public void posDropMid(){
+  public void posDropHighCube(){
     prevPos = currentPos;
-    currentPos = pos.dropMid;
+    currentPos = pos.dropHighCube;
     targetFeeder.clear();
-    targetFeeder.add(new ArmPosition(1.1, 1, consType.pose));
-    targetFeeder.add(new ArmPosition(0.75, 0.5, 0.27, consType.pose));
+    targetFeeder.add(new ArmPosition(1.2, 1, consType.pose));
+    targetFeeder.add(new ArmPosition(1.2, 0.75, 2*Math.PI/3, consType.pose));
+    targetFeeder.add(new ArmPosition(0.75, 0.5, 2*Math.PI/3, consType.pose));
   }
 
-  public void posDropHigh(){
+  public void posDropHighCone(){
     prevPos = currentPos;
-    currentPos = pos.dropHigh;
+    currentPos = pos.dropHighCone;
     targetFeeder.clear();
     targetFeeder.add(new ArmPosition(0.747, Math.PI, Math.PI, consType.angle));
     targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
@@ -202,6 +204,18 @@ public class Arm extends Thread{
     targetFeeder.clear();
     targetFeeder.add(new ArmPosition(0.857, Math.PI, Math.PI/4, consType.angle));
     targetFeeder.add(new ArmPosition(1.5, 0.4, consType.pose));
+  }
+
+  public void posAuto(){
+    prevPos = currentPos;
+    currentPos = pos.holding;
+    targetFeeder.clear();
+    targetFeeder.add(new ArmPosition(0.4, 0.4, consType.pose));
+    targetFeeder.add(new ArmPosition(0.4, 0.3, 7*Math.PI/10, consType.pose));
+    targetFeeder.add(new ArmPosition(1.5, 0.3, 2*Math.PI/3, consType.pose));
+    targetFeeder.add(new ArmPosition(1.2, 1, consType.pose));
+    targetFeeder.add(new ArmPosition(1.2, 0.75, 2*Math.PI/3, consType.pose));
+    targetFeeder.add(new ArmPosition(0.75, 0.5, 2*Math.PI/3, consType.pose));
   }
 
   public void posTrim(double r){

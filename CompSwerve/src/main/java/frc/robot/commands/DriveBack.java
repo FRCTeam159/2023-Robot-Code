@@ -32,7 +32,7 @@ public class DriveBack extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drive.drive(-3, 0, 0, false);
+    m_drive.drive(-1, 0, 0, false);
     c++;
     if(c%10 == 0){
       System.out.println(m_drive.getPose().getX());
