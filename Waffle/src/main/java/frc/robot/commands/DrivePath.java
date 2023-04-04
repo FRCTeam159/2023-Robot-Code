@@ -14,6 +14,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -36,7 +37,7 @@ public class DrivePath extends CommandBase {
   double last_time;
 
   private final PPHolonomicDriveController m_ppcontroller = new PPHolonomicDriveController(
-    new PIDController(4,0,0), new PIDController(4,0,0), new PIDController(2,0,0));
+    new PIDController(6,0,0), new PIDController(2,0,0), new PIDController(2,0,0));
 
   public DrivePath(Drivetrain drive) {
     m_drive = drive;
@@ -85,10 +86,13 @@ public class DrivePath extends CommandBase {
 
   Trajectory pathPlannerTest() {
     try {
-      PathPlannerTrajectory trajectory = PathPlanner.loadPath("Test", 
+      String file=m_drive.centerPosition()?"Center":"NotCenter";
+      PathPlannerTrajectory trajectory = PathPlanner.loadPath(file, 
         new PathConstraints(Drivetrain.kMaxVelocity,Drivetrain.kMaxAcceleration)); // max vel & accel
+
+        System.out.println("selecting auto path:"+file);
     
-      Pose2d p0 = trajectory.getInitialPose();
+      Pose2d p0 = trajectory.getInitialHolonomicPose();
 
       // Pathplanner sets 0,0 as the lower left hand corner (FRC field coord system) 
       // for Gazebo, need to subtract intitial pose from each state so that 0,0 is 
@@ -96,10 +100,19 @@ public class DrivePath extends CommandBase {
 
       List<State> states = trajectory.getStates();
       for(int i=0;i<states.size();i++){
-        State state=states.get(i);
-        Pose2d psi=state.poseMeters.relativeTo(p0);
-        state.poseMeters=psi;
-        System.out.println(state.poseMeters);
+        PathPlannerTrajectory.PathPlannerState state=trajectory.getState(i);
+        Pose2d p=state.poseMeters;
+
+        Rotation2d h=state.holonomicRotation;
+
+        Pose2d pr=p.relativeTo(p0);
+        //if(i==0)
+       //  pr=new Pose2d(pr.getTranslation(),new Rotation2d()); // 
+        state.holonomicRotation=h.plus(new Rotation2d(Math.toRadians(180))); // go backwards
+
+        //Pose2d psi=state.poseMeters.relativeTo(p0);
+        state.poseMeters=pr;
+        //System.out.println(state.poseMeters);
       }
       return trajectory;
     } catch (Exception ex) {
@@ -121,6 +134,9 @@ public class DrivePath extends CommandBase {
     //elapsed = m_drive.getTime();
   
     Trajectory.State reference = m_trajectory.sample(elapsed);
+    //System.out.format("Time:%-1.3f X Current X:%-1.2f Target:%-1.2f\n",
+    //elapsed,m_drive.getPose().getX(),reference.poseMeters.getX()
+   // );
 
     ChassisSpeeds speeds = m_ppcontroller.calculate(m_drive.getPose(), (PathPlannerState) reference);
       m_drive.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);

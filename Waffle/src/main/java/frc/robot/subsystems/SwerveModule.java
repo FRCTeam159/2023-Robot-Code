@@ -27,7 +27,7 @@ public class SwerveModule extends SubsystemBase {
   private final RelativeEncoder m_driveEncoder;
   private final RelativeEncoder m_turningEncoder;
 
-  public static boolean debug = true;
+  public static boolean debug = false;
   String name;
 
   int cnt = 0;
@@ -37,10 +37,10 @@ public class SwerveModule extends SubsystemBase {
 
 
   // PID controllers for drive and steer motors
-  private final PIDController m_drivePIDController = new PIDController(0.4, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(2, 0, 0);
 
   private final PIDController m_turningPIDController = new PIDController(
-      0.3,
+      0.2,
       0,
       0
       // new TrapezoidProfile.Constraints(
@@ -96,6 +96,9 @@ public class SwerveModule extends SubsystemBase {
     m_turningPIDController.enableContinuousInput(-Math.PI,Math.PI);
   }
 
+  public double getRotations(){
+    return m_driveEncoder.getPosition()/m_driveEncoder.getPositionConversionFactor();
+  }
   public void reset(){
     m_driveEncoder.setPosition(0);
     m_turningEncoder.setPosition(0);
@@ -188,8 +191,8 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public void log() {
-    String s = String.format("Drive:%-1.2f m Angle:%-4.1f Abs:%-4.1f deg\n", 
-    getDistance(), getRotation2d().getDegrees(),Math.toDegrees(heading()));
+    String s = String.format("Drive:%-1.3f m Angle:%-4.1f Rotations:%-4.2f\n", 
+    getDistance(), getRotation2d().getDegrees(),getRotations());
     SmartDashboard.putString(name, s);
     
   }
@@ -214,6 +217,8 @@ public class SwerveModule extends SubsystemBase {
  
   @Override
   public void periodic() {
+    if(debug)
+      log();
     // This method will be called once per scheduler run
   }
 

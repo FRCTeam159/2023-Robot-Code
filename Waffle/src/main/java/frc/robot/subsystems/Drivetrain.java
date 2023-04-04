@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import static frc.robot.Constants.*;
@@ -26,8 +27,9 @@ import static frc.robot.Constants.*;
 public class Drivetrain extends SubsystemBase {
   public static double dely = Units.inchesToMeters(0.5 * kSideWheelBase); // 0.2949 metters
   public static double delx = Units.inchesToMeters(0.5 * kFrontWheelBase);
-  public static double kMaxAcceleration = 1.0;
-  public static double kMaxVelocity = 1.0;
+  public static final double kMaxAcceleration = 1.0;
+  public static final double kMaxVelocity = 2.0;
+  public static final double kMaxAngularAcceleration = Math.PI; // 1 rotations/s/s
 
   private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
 	private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
@@ -46,6 +48,8 @@ public class Drivetrain extends SubsystemBase {
   //private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backRight,m_backLeft};
   private final SwerveModule[] modules={m_frontLeft,m_frontRight,m_backLeft,m_backRight};
 
+  DigitalInput input = new DigitalInput(0);
+
   private final Field2d m_Field2d = new Field2d();
   Timer m_timer = new Timer();
 
@@ -61,6 +65,7 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain() {
     SmartDashboard.putData("Field" , m_Field2d);
     SmartDashboard.putBoolean("Field Oriented" , m_field_oriented);
+    SmartDashboard.putBoolean("Switch" , false);
     //SmartDashboard.putBoolean("optimize", m_optimize);
     m_gyro.reset();
 
@@ -71,6 +76,10 @@ public class Drivetrain extends SubsystemBase {
    m_backRight.setDriveInverted(true);
 
     resetOdometry();
+  }
+
+  public boolean centerPosition(){
+    return input.get();
   }
 
   private void resetPositions() {
@@ -133,7 +142,7 @@ public class Drivetrain extends SubsystemBase {
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxVelocity);
     for(int i=0;i<modules.length;i++)
       modules[i].setDesiredState(swerveModuleStates[i]);
    
@@ -150,6 +159,9 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putString("Pose", s);
 
     m_field_oriented=SmartDashboard.getBoolean("Field Oriented" , m_field_oriented);
+    SmartDashboard.putBoolean("Switch" , input.get());
+    for(int i=0;i<modules.length;i++)
+      modules[i].log();
     
     //SmartDashboard.putBoolean("optimize", m_optimize);
   }

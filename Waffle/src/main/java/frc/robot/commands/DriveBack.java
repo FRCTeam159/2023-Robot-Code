@@ -39,7 +39,7 @@ public class DriveBack extends CommandBase {
   public void execute() {
     Pose2d pose = m_drive.getPose();
     double x = pose.getX();
-    double error = m_xController.calculate(x, m_target) * kMaxSpeed;
+    double error = m_xController.calculate(x, m_target) *Drivetrain.kMaxVelocity;
     if((count % 10) == 0)
     System.out.format("x: %-1.2f target: %-1.2f correction: %-1.2f\n", x, m_target, error);
     count++;
