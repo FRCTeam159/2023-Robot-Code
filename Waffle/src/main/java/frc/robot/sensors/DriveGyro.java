@@ -67,7 +67,14 @@ public class DriveGyro implements Gyro{
   }
   @Override
   public double getAngle() {
-    return gyro.getAngle();
+    switch(gyro_type){
+      default:
+      case FRC450:
+        return -gyro.getAngle();
+      case NAVX:
+      case BNO55:
+        return gyro.getAngle();
+    }
   }
   @Override
   public double getRate() {

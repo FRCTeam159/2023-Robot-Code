@@ -29,7 +29,7 @@ public class Drivetrain extends SubsystemBase {
   public static double delx = Units.inchesToMeters(0.5 * kFrontWheelBase);
   public static final double kMaxAcceleration = 1.0;
   public static final double kMaxVelocity = 2.0;
-  public static final double kMaxAngularAcceleration = Math.PI; // 1 rotations/s/s
+  public static final double kMaxAngularAcceleration =Math.PI; // 1 rotations/s/s
 
   private final Translation2d m_frontLeftLocation = new Translation2d(delx, dely);
 	private final Translation2d m_frontRightLocation = new Translation2d(delx, -dely);
@@ -55,8 +55,9 @@ public class Drivetrain extends SubsystemBase {
 
   static boolean m_optimize=true;
 
+
   static int count = 0;
-  DriveGyro m_gyro = new DriveGyro(DriveGyro.gyros.BNO55);
+  DriveGyro m_gyro = new DriveGyro(DriveGyro.gyros.FRC450);
   double last_heading = 0; 
   SwerveModulePosition[] m_positions = {
       new SwerveModulePosition(), new SwerveModulePosition(),
@@ -157,7 +158,6 @@ public class Drivetrain extends SubsystemBase {
     String s=String.format("X:%-2.1f Y:%-2.1f H:%-2.1f",
     pose.getX(),pose.getY(),pose.getRotation().getDegrees());
     SmartDashboard.putString("Pose", s);
-
     m_field_oriented=SmartDashboard.getBoolean("Field Oriented" , m_field_oriented);
     SmartDashboard.putBoolean("Switch" , input.get());
     for(int i=0;i<modules.length;i++)

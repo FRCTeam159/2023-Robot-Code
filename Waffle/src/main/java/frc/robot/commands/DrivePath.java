@@ -86,7 +86,7 @@ public class DrivePath extends CommandBase {
 
   Trajectory pathPlannerTest() {
     try {
-      String file=m_drive.centerPosition()?"Center":"NotCenter";
+      String file="Test";//m_drive.centerPosition()?"Center":"NotCenter";
       PathPlannerTrajectory trajectory = PathPlanner.loadPath(file, 
         new PathConstraints(Drivetrain.kMaxVelocity,Drivetrain.kMaxAcceleration)); // max vel & accel
 
