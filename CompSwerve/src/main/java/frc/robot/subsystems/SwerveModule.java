@@ -2,6 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+// That could be at least part of your problem. What we did was use a straight edge and point all of the wheels forward. We then read the absolute position.
+// angleCANcoder.getAbsolutePosition();
+// We then recorded that value and stored this value in as a constant as our angleZero (it is different for each module)
+// Then when the module was constructed we used the.
+// angleCANcoder.configMagnetOffset(-angleZero);
+// This made all of our modules absolute position 0 when pointed forward.
+
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

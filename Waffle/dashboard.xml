@@ -1,0 +1,147 @@
+<xml version="1.0">
+<dashboard>
+	<widget field="Switch" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="309" y="13"/>
+		<width>65</width>
+		<height>25</height>
+	</widget>
+	<widget field="Pose" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="31" y="188"/>
+		<width>200</width>
+	</widget>
+	<widget field="Gyro" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="181" y="15"/>
+	</widget>
+	<widget field="BR" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="29" y="148"/>
+		<width>287</width>
+	</widget>
+	<widget field="BL" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="29" y="114"/>
+		<width>285</width>
+	</widget>
+	<widget field="FR" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="25" y="80"/>
+		<width>289</width>
+	</widget>
+	<widget field="FL" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="26" y="47"/>
+		<width>288</width>
+	</widget>
+	<widget field="Field Oriented" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.CheckBox">
+		<location x="68" y="14"/>
+	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="17" y="11"/>
+		<width>23</width>
+		<height>23</height>
+	</static-widget>
+		<property name="Team Number/Host" value="159"/>
+		<property name="Automatically Show Widgets" value="false"/>
+		<property name="Grid Cell Width(s)" value="16"/>
+		<property name="Grid Cell Height(s)" value="16"/>
+		<property name="Window X Position" value="928"/>
+		<property name="Window Y Position" value="283"/>
+		<property name="Window Width" value="682"/>
+		<property name="Window Height" value="598"/>
+		<property name="Save File" value="C:\Users\deans\Robotics\FRCTeamRepos\2023-Robot-Code\Waffle\dashboard.xml"/>
+</dashboard>
+<live-window>
+</live-window>
+	<hidden field="Field"/>
+</xml>
